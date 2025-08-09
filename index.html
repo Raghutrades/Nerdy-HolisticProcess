@@ -4,10 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nerdys - HolisticProcess</title>
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="manifest" href="/site.webmanifest">
+    <!-- Favicon and Apple Touch Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="manifest" href="site.webmanifest">
+    <link rel="shortcut icon" href="favicon.ico">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js CDN -->
@@ -519,6 +523,11 @@
             align-items: center;
             overflow: hidden; /* Hide overflowing icons */
             transition: background-color 0.2s, border-color 0.2s;
+            cursor: pointer; /* Make day cells clickable */
+        }
+        #process-calendar-grid .day-cell:not(.empty):hover {
+            background-color: var(--section-bg);
+            border-color: var(--accent-primary);
         }
         #process-calendar-grid .day-cell.today {
             border: 2px solid var(--accent-primary);
@@ -527,6 +536,7 @@
         #process-calendar-grid .day-cell.empty {
             background-color: transparent;
             border: none;
+            cursor: default; /* No pointer for empty cells */
         }
         #process-calendar-grid .day-number {
             font-weight: bold;
@@ -1051,6 +1061,10 @@
                 id="journey-date-bottom"
                 class="p-2 rounded-md bg-gray-700 text-gray-100 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer text-center"
             />
+            <!-- New Calendar Icon Button -->
+            <button id="open-calendar-btn" class="golden-button px-3 py-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+            </button>
         </div>
         <p class="text-sm text-gray-400">Viewing: <span id="current-date-display" class="font-bold text-blue-300"></span></p>
         <div id="save-indicator" class="text-sm text-green-400 font-semibold opacity-0 transition-opacity duration-300">
@@ -1321,6 +1335,7 @@
         const processNextMonthBtn = document.getElementById('process-next-month-btn');
         const processCurrentMonthYear = document.getElementById('process-current-month-year');
         const processCalendarGrid = document.getElementById('process-calendar-grid');
+        const openCalendarBtn = document.getElementById('open-calendar-btn'); // New calendar icon button
 
 
         // Market Insight Display Elements
@@ -1487,6 +1502,14 @@
             processNextMonthBtn.addEventListener('click', () => {
                 currentProcessCalendarDate.setMonth(currentProcessCalendarDate.getMonth() + 1);
                 renderProcessCalendar();
+            });
+
+            // New: Open Calendar Button
+            openCalendarBtn.addEventListener('click', () => {
+                showTab('analytics');
+                document.getElementById('tab-analytics').classList.add('active', 'bg-blue-600', 'text-white', 'shadow-md', 'transform', 'scale-105');
+                document.getElementById('tab-journey').classList.remove('active', 'bg-blue-600', 'text-white', 'shadow-md', 'transform', 'scale-105'); // Deactivate other tab
+                document.getElementById('tab-journey').classList.add('bg-gray-700', 'text-gray-300', 'hover:bg-gray-600');
             });
 
 
@@ -1972,7 +1995,7 @@
                 };
                 dailyProcessMetrics = updatedMetrics; // Update global variable
                 localStorage.setItem('trading_journey_metrics', JSON.stringify(updatedMetrics));
-                localStorage.setItem(`breath_count_${selectedDate}`, breathCount.toString()); // Save breath count
+                localStorage.setItem(`breath_count_${date}`, breathCount.toString()); // Save breath count for the specific date
 
                 // Re-render process calendar if in analytics tab
                 if (activeTab === 'analytics') {
@@ -1993,7 +2016,7 @@
                 chartSnapshots = entry.chartSnapshots || []; // Ensure it's an array, default empty
                 dailyObservationsTextarea.value = dailyObservationsText;
 
-                breathCount = parseInt(localStorage.getItem(`breath_count_${selectedDate}`) || '0'); // Load breath count
+                breathCount = parseInt(localStorage.getItem(`breath_count_${date}`) || '0'); // Load breath count for the specific date
                 breathCountValue.textContent = breathCount;
 
                 renderDroppedItems(); // Re-render the circle and reflection panels
@@ -2002,12 +2025,12 @@
                 console.log(`Journal for ${date} loaded.`);
             } catch (e) {
                 console.error("Failed to load from localStorage:", e);
+                // Reset to default empty state in case of load error
                 droppedItems = [];
                 dailyObservationsText = '';
                 chartSnapshots = [];
-                dailyProcessMetrics = {};
-                dailyObservationsTextarea.value = '';
                 breathCount = 0;
+                dailyObservationsTextarea.value = '';
                 breathCountValue.textContent = 0;
                 renderDroppedItems();
                 renderChartSnapshots();
@@ -2027,9 +2050,10 @@
         }
 
         function handleDateChange(e) {
+            // Before changing the date, save the current day's progress manually.
+            saveJournalEntry(selectedDate, droppedItems, dailyObservationsText, chartSnapshots);
+            
             const newDate = e.target.value;
-            // Removed auto-save on date change, replaced by explicit save button
-            // saveJournalEntry(selectedDate, droppedItems, dailyObservationsText, chartSnapshots);
             selectedDate = newDate;
             updateDateDisplay();
             loadJournalEntries(selectedDate); // Load new day's notes
@@ -2071,7 +2095,7 @@
                 }
             } catch (e) {
                 console.error("Failed to discard day's progress:", e);
-                alert("Error: Could not discard day's progress."); // Using alert for critical error
+                // alert("Error: Could not discard day's progress."); // Using alert for critical error
             }
         }
 
@@ -2125,7 +2149,7 @@
                 showSaveSuccess("All data exported!");
             } catch (e) {
                 console.error("Failed to export data:", e);
-                alert("Error: Could not export data. Check console for details."); // Using alert for critical error
+                // alert("Error: Could not export data. Check console for details."); // Using alert for critical error
             }
         }
 
@@ -2156,11 +2180,12 @@
                             renderProcessCalendar(); // Update calendar after import
                         }
                     } else {
-                        alert("Error: Invalid JSON structure for import. Expected an object."); // Using alert for critical error
+                        // alert("Error: Invalid JSON structure for import. Expected an object."); // Using alert for critical error
+                        console.error("Error: Invalid JSON structure for import. Expected an object.");
                     }
                 } catch (e) {
                     console.error("Failed to import data:", e);
-                    alert("Error: Failed to parse JSON file or import data."); // Using alert for critical error
+                    // alert("Error: Failed to parse JSON file or import data."); // Using alert for critical error
                 }
             };
             reader.readAsText(file);
@@ -2717,6 +2742,8 @@
         function renderProcessCalendar() {
             const calendarGrid = document.getElementById('process-calendar-grid');
             const monthYearHeader = document.getElementById('process-current-month-year');
+            
+            // Clear and re-add day names
             calendarGrid.innerHTML = `
                 <div class="day-name">Sun</div>
                 <div class="day-name">Mon</div>
@@ -2725,7 +2752,7 @@
                 <div class="day-name">Thu</div>
                 <div class="day-name">Fri</div>
                 <div class="day-name">Sat</div>
-            `; // Clear and re-add day names
+            `;
 
             const year = currentProcessCalendarDate.getFullYear();
             const month = currentProcessCalendarDate.getMonth(); // 0-indexed
@@ -2749,9 +2776,11 @@
 
             // Days of the month
             for (let day = 1; day <= daysInMonth; day++) {
-                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const date = new Date(year, month, day);
+                const dateStr = date.toISOString().slice(0, 10); // YYYY-MM-DD format
                 const dayCell = document.createElement('div');
                 dayCell.className = `day-cell`;
+                dayCell.dataset.date = dateStr; // Store the full date string
 
                 const dayNumSpan = document.createElement('span');
                 dayNumSpan.className = 'day-number';
@@ -2759,7 +2788,7 @@
                 dayCell.appendChild(dayNumSpan);
 
                 // Highlight today's date
-                if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+                if (date.toDateString() === today.toDateString()) {
                     dayCell.classList.add('today');
                 }
 
@@ -2768,7 +2797,8 @@
                 if (dayMetrics) {
                     const iconContainer = document.createElement('div');
                     iconContainer.className = 'day-icons';
-                    dayMetrics.icons.forEach(icon => {
+                    // Ensure icons are mapped from an array, not a direct property
+                    (dayMetrics.icons || []).forEach(icon => { // Added || [] for safety
                         const iconSpan = document.createElement('span');
                         iconSpan.textContent = icon;
                         iconContainer.appendChild(iconSpan);
@@ -2789,6 +2819,33 @@
                         percentageSpan.classList.add('red');
                     }
                     dayCell.appendChild(percentageSpan);
+                }
+
+                // Add click listener to each day cell (only for non-empty cells)
+                if (!dayCell.classList.contains('empty')) {
+                    dayCell.addEventListener('click', (e) => {
+                        const clickedDate = e.currentTarget.dataset.date;
+                        if (clickedDate) {
+                            // First, save current day's progress before navigating
+                            saveJournalEntry(selectedDate, droppedItems, dailyObservationsText, chartSnapshots);
+
+                            // Set the new selected date
+                            selectedDate = clickedDate;
+                            updateDateDisplay(); // Update the date picker and display
+
+                            // Switch to the Journey tab
+                            showTab('journey');
+                            // Update header tab active states
+                            document.querySelectorAll('header button').forEach(btn => {
+                                btn.classList.remove('active', 'bg-blue-600', 'text-white', 'shadow-md', 'transform', 'scale-105');
+                                btn.classList.add('bg-gray-700', 'text-gray-300', 'hover:bg-gray-600');
+                            });
+                            document.getElementById('tab-journey').classList.add('active', 'bg-blue-600', 'text-white', 'shadow-md', 'transform', 'scale-105');
+
+                            // Load entries for the clicked date
+                            loadJournalEntries(selectedDate);
+                        }
+                    });
                 }
 
                 calendarGrid.appendChild(dayCell);
