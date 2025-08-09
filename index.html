@@ -453,6 +453,10 @@
             <button id="tab-analytics" class="px-6 py-3 rounded-lg text-lg font-semibold transition-all duration-300 bg-gray-700 text-gray-300 hover:bg-gray-600 whitespace-nowrap">
                 Analytics 📊
             </button>
+            <!-- NEW: NerdyTradeJournal Link -->
+            <a href="https://raghutrades.github.io/NerdyTradeJournal//" target="_blank" class="px-6 py-3 rounded-lg text-lg font-semibold transition-all duration-300 bg-gray-700 text-gray-300 hover:bg-gray-600 whitespace-nowrap flex items-center">
+                Trade Journal 📝
+            </a>
         </div>
     </header>
 
@@ -650,7 +654,7 @@
                         <strong>What it is:</strong> Defining precise entry, stop-loss, and target levels, along with position sizing, *before* placing the trade. Then, executing the entry according to this plan.
                     </p>
                     <p class="mb-2 text-gray-200">
-                        <strong>Why it's crucial:</strong> This is where preparation meets reality. A well-defined trade plan removes ambiguity and emotional decision-making during live trading. Strict adherence to your stop-loss protects capital, and pre-defined targets ensure you're not overly greedy. Position sizing, based on your risk per trade, is the ultimate capital preservation tool. This step transforms trading from gambling into a calculated business.
+                        <strong>Why it's crucial:</strong> A well-defined trade plan removes ambiguity and emotional decision-making during live trading. Strict adherence to your stop-loss protects capital, and pre-defined targets ensure you're not overly greedy. Position sizing, based on your risk per trade, is the ultimate capital preservation tool. This step transforms trading from gambling into a calculated business.
                     </p>
                     <p class="mb-2 text-gray-200">
                         <strong>How it connects to your scripts:</strong> Your scripts provide the analytical foundation for *where* to place your entry and stop-loss. For example, `SymoCIB + Reversals` support/resistance levels can act as natural stop-loss or target zones. By combining these objective levels from your scripts with your risk management rules, you build a robust and quantifiable trade plan.
@@ -1035,7 +1039,7 @@
                     how: "How did you analyze this? (e.g., SymoCIB's sector strength summary, initial balance breakouts, identifying key price action patterns like opening range expansion)"
                 }
             },
-            { id: 'sector_deep_dive', name: 'Sector Deep Dive / Stock Selection', icon: '🔬', rank: 2,
+            { id: 'sector_deep_dive', name: 'Sector Deep Dive / Stock Selection', icon: '�', rank: 2,
                 prompts: {
                     why: "Why did you choose these specific stocks within the identified sectors? (e.g., leading/lagging stock, high/low IV, strong chart structure, alignment with sector move)",
                     how: "What specific criteria did you use? (e.g., F&O HawkView's bullish/bearish signals, VWAP confluence, Fibonacci retracements, order flow analysis near initial balance, previous day's data)"
@@ -1606,6 +1610,7 @@
                     <p class="text-gray-200 text-sm"><span class="font-bold">Why:</span> ${item.why}</p>
                     <p class="text-gray-200 text-sm"><span class="font-bold">How:</span> ${item.how}</p>
                 `;
+                reflectionItemDiv.appendChild(document.createElement('hr')).className = "my-4 border-gray-600"; // Add horizontal rule
                 reflectionItemsContainer.appendChild(reflectionItemDiv);
             });
 
@@ -1666,10 +1671,12 @@
                 // If 'breathe_meditate' is present and no other core steps, and MIN_STEPS_FOR_GOOD_DISCIPLINE is 1, count it.
                 // Otherwise, if 'breathe_meditate' is present with other steps, it contributes to the count.
                 if (dropped.some(item => item.id === 'breathe_meditate')) {
-                    if (coreStepsLogged === 0 && MIN_STEPS_FOR_GOOD_DISCIPLINE === 1) {
-                         actualStepsForDiscipline = 1;
-                    } else if (coreStepsLogged > 0) {
+                    if (coreStepsLogged > 0) {
                         actualStepsForDiscipline = coreStepsLogged + 1; // Count breathe as an additional step if other steps are present
+                    } else if (MIN_STEPS_FOR_GOOD_DISCIPLINE === 1) {
+                        actualStepsForDiscipline = 1; // Only breathe, and target is 1
+                    } else {
+                        actualStepsForDiscipline = 0; // Only breathe, but target is >1, so it doesn't count towards core.
                     }
                 }
                 
