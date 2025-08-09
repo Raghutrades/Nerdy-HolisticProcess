@@ -1,0 +1,2385 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nerdys - HolisticProcess</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js Data Labels Plugin (for pie/doughnut charts) -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Define CSS Variables for theming - REVERTED TO PREVIOUS THEME BASE */
+        :root { /* Dark Theme Variables (default) */
+            --body-bg: #0d1117;
+            --body-text: #c9d1d9; /* Base text color */
+            --card-bg: #1f2937; /* Background for larger content blocks (modal, table headers) */
+            --section-bg: #1f2937; /* Used for main content div backgrounds */
+            --input-group-bg: #2d3748; /* Background for input wrappers and emotion items */
+            --input-text: #c9d1d9; /* Text color inside inputs and icons in input groups */
+            --accent-primary: #6366f1; /* Primary accent color (e.g., blue) */
+            --border-color: #4a5568;
+            --chart-grid-color: rgba(201,209,217,0.1); /* Light gray for grid lines in dark mode */
+            --chart-text-color: #c9d1d9; /* Text color for chart labels/legends */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden; /* Prevent horizontal scroll on body */
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(to bottom right, var(--body-bg), #1f2937); /* Gradient background */
+            color: var(--body-text); /* Base text color */
+        }
+
+        /* Custom Scrollbar for horizontal and vertical scrolls */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent; /* Make track transparent by default */
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: transparent; /* Make thumb transparent by default */
+            border-radius: 10px;
+        }
+
+        /* Show scrollbar on hover of the container */
+        .custom-scrollbar:hover::-webkit-scrollbar-thumb {
+            background: #60a5fa; /* Blue thumb on hover */
+        }
+        .custom-scrollbar:hover::-webkit-scrollbar-track {
+            background: #2d3748; /* Darker gray track on hover */
+        }
+
+        /* For Firefox (less granular control for auto-hide) */
+        .custom-scrollbar {
+            scrollbar-width: thin;
+            scrollbar-color: transparent transparent; /* Default transparent */
+        }
+        .custom-scrollbar:hover {
+            scrollbar-color: #60a5fa #2d3748; /* Show on hover */
+        }
+
+
+        /* Animations */
+        @keyframes fade-in-down {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-down { animation: fade-in-down 1s ease-out forwards; }
+
+        @keyframes fade-in {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .animate-fade-in { animation: fade-in 0.5s ease-out forwards; }
+
+        @keyframes pulse-once {
+            0% { transform: scale(1); box-shadow: 0 0 0px rgba(0,0,0,0); }
+            50% { transform: scale(1.03); box-shadow: 0 0 15px rgba(59,130,246,0.7); } /* Blue pulse */
+            100% { transform: scale(1); box-shadow: 0 0 0px rgba(0,0,0,0); }
+        }
+        .animate-pulse-once {
+            animation: pulse-once 0.5s ease-in-out;
+        }
+
+        @keyframes pulse-border-animation {
+            0% { border-color: var(--border-color); box-shadow: 0 0 0px rgba(0,0,0,0.5); }
+            50% { border-color: #60a5fa; box-shadow: 0 0 20px rgba(96,165,250,0.7); } /* Blue border pulse */
+            100% { border-color: var(--border-color); box-shadow: 0 0 0px rgba(0,0,0,0.5); }
+        }
+        .animate-pulse-border {
+            animation: pulse-border-animation 3s infinite alternate;
+        }
+
+        @keyframes fade-in-out {
+            0% { opacity: 0; }
+            25% { opacity: 1; }
+            75% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        .animate-fade-in-out {
+            animation: fade-in-out 2s ease-in-out forwards;
+        }
+
+        /* Smoother breathe-float-glow animation */
+        @keyframes breathe-float-glow {
+            0% { transform: translateY(0) scale(1); opacity: 0.8; text-shadow: 0 0 10px rgba(59,130,246,0.5); } /* Blue Glow */
+            25% { transform: translateY(-8px) scale(1.03); opacity: 0.9; text-shadow: 0 0 15px rgba(59,130,246,0.6); }
+            50% { transform: translateY(-15px) scale(1.06); opacity: 1; text-shadow: 0 0 25px rgba(59,130,246,0.8), 0 0 35px rgba(59,130,246,0.4); }
+            75% { transform: translateY(-8px) scale(1.03); opacity: 0.9; text-shadow: 0 0 15px rgba(59,130,246,0.6); }
+            100% { transform: translateY(0) scale(1); opacity: 0.8; text-shadow: 0 0 10px rgba(59,130,246,0.5); }
+        }
+        .animate-breathe-float-glow {
+            animation: breathe-float-glow 5s ease-in-out infinite; /* Increased duration for smoother effect */
+        }
+
+        /* Breathing Circle Animation for the drop circle - NEW COLORS */
+        @keyframes breathe-circle-in {
+            0% { transform: scale(1); border-color: rgba(59,130,246,0.4); box-shadow: 0 0 10px rgba(59,130,246,0.2); } /* Tailwind Blue-500 */
+            50% { transform: scale(1.05); border-color: rgba(59,130,246,0.8); box-shadow: 0 0 25px rgba(59,130,246,0.5), 0 0 40px rgba(59,130,246,0.2); }
+            100% { transform: scale(1); border-color: rgba(59,130,246,0.4); box-shadow: 0 0 10px rgba(59,130,246,0.2); }
+        }
+        @keyframes breathe-circle-out {
+            0% { transform: scale(1); border-color: rgba(34,197,94,0.4); box-shadow: 0 0 10px rgba(34,197,94,0.2); } /* Tailwind Green-500 */
+            50% { transform: scale(0.95); border-color: rgba(34,197,94,0.8); box-shadow: 0 0 25px rgba(34,197,94,0.5), 0 0 40px rgba(34,197,94,0.2); }
+            100% { transform: scale(1); border-color: rgba(34,197,94,0.4); box-shadow: 0 0 10px rgba(34,197,94,0.2); }
+        }
+        .breathe-in-animation { animation: breathe-circle-in var(--breathe-in-duration) ease-in-out forwards; }
+        .breathe-out-animation { animation: breathe-circle-out var(--breathe-out-duration) ease-in-out forwards; }
+        .breathe-pause-animation { animation: none; } /* No animation during pause, just hold state */
+
+
+        /* Styling for list items in detailed tabs */
+        ul.list-circle li {
+            list-style-type: circle;
+            margin-left: 1.5rem;
+        }
+        .chart-container {
+            position: relative;
+            height: 100%;
+            width: 100%;
+            min-height: 200px; /* Ensure a minimum height for charts */
+        }
+        /* Specific height for main content area to prevent blocking */
+        .main-content-area {
+            flex-grow: 1;
+            /* Space for the fixed date ribbon (56px) + footer (48px) + some buffer */
+            padding-bottom: 110px;
+        }
+        /* Removed scrollable-panel from specific sections as requested */
+        .scrollable-panel {
+            max-height: calc(100vh - 400px); /* Default height for scrollable panels */
+            overflow-y: auto;
+        }
+
+        /* Overrides for specific panels as requested */
+        #content-journey .panel-item:nth-child(2) { /* Daily Observations & Chart Readings */
+            max-height: none; /* Remove max-height */
+            overflow-y: visible; /* Remove scrollbar */
+        }
+        #reflection-items-container .reflection-item-wrapper {
+             border-bottom: 1px solid #4a5568; /* Line rule */
+             padding-bottom: 1rem;
+             margin-bottom: 1rem;
+        }
+        #reflection-items-container .reflection-item-wrapper:last-child {
+            border-bottom: none; /* No line after the last item */
+        }
+        /* Removed overflow from individual circle item popups */
+        .drop-circle .group-hover\:opacity-100.p-4 {
+            overflow: visible !important; /* Ensure content expands */
+        }
+
+        /* Responsive adjustments for the main content flex container */
+        @media (max-width: 1024px) {
+            .main-content-flex {
+                flex-direction: column;
+            }
+            .left-circle-area, .right-panels-area {
+                width: 100%;
+                max-width: 100%;
+            }
+            .left-circle-area {
+                min-height: 400px; /* Ensure circle remains visible */
+            }
+            .right-panels-area {
+                flex-direction: column; /* Stack panels vertically on smaller screens */
+            }
+            .panel-item {
+                width: 100%;
+                margin-left: 0;
+            }
+            .chart-snapshot-item img {
+                max-width: 100%;
+                height: auto;
+            }
+        }
+        @media (max-width: 768px) {
+            .header-tabs button {
+                padding: 0.5rem 0.75rem; /* Smaller padding */
+                font-size: 0.8rem; /* Smaller font size */
+            }
+            .draggable-elements-ribbon {
+                padding: 0.75rem;
+                gap: 1rem;
+            }
+            .draggable-elements-ribbon .min-w-\[200px\] {
+                min-width: 160px;
+            }
+            .main-content-area {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            .drop-circle {
+                width: 300px;
+                height: 300px;
+                font-size: 1.25rem;
+            }
+            .drop-circle .w-24.h-24 {
+                width: 60px;
+                height: 60px;
+                font-size: 0.75rem;
+            }
+            .drop-circle .text-4xl {
+                font-size: 2rem;
+            }
+            .drop-circle .text-xs {
+                font-size: 0.6rem;
+            }
+            .date-ribbon { /* Renamed from bottom-ribbon */
+                padding: 0.75rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+        /* Styling for date input to match dark theme */
+        input[type="date"] {
+            -webkit-appearance: none; /* Remove default styling for WebKit browsers */
+            -moz-appearance: none;    /* Remove default styling for Mozilla browsers */
+            appearance: none;         /* Remove default styling */
+            background-color: var(--input-group-bg); /* bg-gray-700 */
+            color: var(--input-text); /* text-gray-100 */
+            border: 1px solid var(--border-color); /* border-gray-600 */
+            border-radius: 0.375rem; /* rounded-md */
+            padding: 0.5rem 0.75rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        /* Style for the calendar icon/button in WebKit browsers */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(0.8); /* Make icon visible on dark background */
+            cursor: pointer;
+        }
+
+        /* Header Button specific styling for animated borders */
+        .header-tabs button {
+            position: relative;
+            overflow: hidden;
+            z-index: 1; /* Ensure text is above pseudo-elements */
+            border: 1px solid transparent; /* Start with transparent border */
+        }
+
+        .header-tabs button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 0.5rem; /* Match button border-radius */
+            padding: 2px; /* Control border thickness */
+            background: linear-gradient(45deg, #6366f1, #a855f7, #60a5fa, #06b6d4); /* Colorful gradient */
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            z-index: -1;
+            opacity: 0; /* Hidden by default */
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .header-tabs button:hover::before,
+        .header-tabs button.active::before {
+            opacity: 1; /* Show on hover and active */
+        }
+        /* Footer styles */
+        .app-footer {
+            padding: 8px 15px; /* Padding inside the box */
+            background: #1f2937; /* Consistent dark background */
+            border-top: 1px solid #2d3748; /* Top border for the box */
+            border-radius: 0; /* No rounded corners for a full-width footer */
+            text-align: center;
+            font-size: 14px;
+            color: #a0aec0; /* Lighter grey for subtle text */
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.4); /* Shadow for footer */
+            flex-shrink: 0; /* Prevent shrinking */
+            position: fixed; /* Make it fixed at the bottom */
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 10; /* Lower z-index so ribbon is above it */
+        }
+
+        .app-footer a {
+            color: #60a5fa; /* Blue color for links */
+            text-decoration: none;
+            transition: color 0.3s ease; /* Smooth transition */
+        }
+
+        .app-footer a:hover {
+            color: #3b82f6; /* Darker blue on hover */
+        }
+
+        /* Golden glow for @Nerdyintruder on hover */
+        .app-footer a.nerdyintruder-link:hover {
+            color: #FFD700; /* Gold color */
+            text-shadow: 0 0 8px #FFD700, 0 0 15px rgba(255,215,0,0.5); /* Golden glow effect */
+        }
+
+
+        .app-footer .heart-pulse {
+            font-size: 16px;
+            color: #ef4444; /* Red color for the heart */
+            margin: 0 4px; /* Space around the heart */
+            animation: pulse-heart 1s infinite alternate; /* Pulsating animation */
+            display: inline-block; /* Ensure animation applies correctly */
+        }
+
+        @keyframes pulse-heart {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.1); }
+        }
+
+        /* Style for dropped items in the circle - SIMPLIFIED */
+        .drop-circle .circle-item {
+            background-color: #6366f1; /* Blue background for dropped items */
+            color: #fff; /* White text on blue background */
+            box-shadow: 0 0 15px rgba(99,102,241,0.5);
+            border: 1px solid rgba(99,102,241,0.7);
+        }
+        .drop-circle .circle-item:hover {
+            background-color: #4f46e5;
+        }
+        .drop-circle .circle-item .remove-btn {
+            background-color: #ef4444; /* Red */
+        }
+        .drop-circle .circle-item .remove-btn:hover {
+            background-color: #dc2626; /* Darker red */
+        }
+        /* Popup details for hover */
+        .drop-circle .circle-item .popup-details {
+            background-color: #1f2937; /* Dark background */
+            border: 1px solid #4a5568;
+            color: #c9d1d9;
+        }
+        .drop-circle .circle-item .popup-details p span {
+            color: #60a5fa; /* Blue for 'Why' and 'How' labels */
+        }
+
+        /* Styles for golden-button */
+        .golden-button {
+            padding: 12px 14px;
+            border-radius: 8px;
+            border: 1px solid rgba(59, 130, 246, 0.5); /* Blue border */
+            background: #1f2937; /* Dark background */
+            color: #c9d1d9;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease-in-out;
+            outline: none;
+        }
+
+        .golden-button:hover {
+            background: #2d3748; /* Slightly lighter on hover */
+            border-color: #60a5fa; /* Brighter blue border */
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+            transform: translateY(-1px);
+        }
+
+        .golden-button:active {
+            transform: translateY(0);
+            box-shadow: none;
+            background: #1a202c; /* Even darker on active */
+        }
+
+        .golden-button.danger {
+            border-color: #ef4444; /* Red border */
+            background: rgba(239, 68, 68, 0.2); /* Red with transparency */
+            color: #ef4444;
+        }
+
+        .golden-button.danger:hover {
+            background: rgba(239, 68, 68, 0.4);
+            border-color: #f87171;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        }
+
+        .golden-button.danger:active {
+            background: rgba(239, 68, 68, 0.6);
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+    <!-- Compact Market Insights Ribbon (Moved to very top of BODY) -->
+    <div class="w-full bg-gray-900 p-3 flex flex-wrap justify-around items-center shadow-md text-center z-20 flex-shrink-0 animate-fade-in gap-3">
+        <div class="flex flex-col sm:flex-row items-center gap-1">
+            <h3 class="text-base font-semibold text-blue-300 whitespace-nowrap">Next Session:</h3>
+            <p id="next-session-countdown" class="text-lg font-bold text-white">Loading...</p>
+        </div>
+        <div class="flex flex-col sm:flex-row items-center gap-1">
+            <h3 class="text-base font-semibold text-green-300 whitespace-nowrap">Sessions This Month:</h3>
+            <p id="sessions-month" class="text-lg font-bold text-white">Loading...</p>
+        </div>
+        <div class="flex flex-col sm:flex-row items-center gap-1">
+            <h3 class="text-base font-semibold text-purple-300 whitespace-nowrap">Sessions This Year:</h3>
+            <p id="sessions-year" class="text-lg font-bold text-white">Loading...</p>
+        </div>
+    </div>
+
+    <!-- Header with Navigation Tabs -->
+    <header class="w-full max-w-7xl mx-auto flex justify-center items-center p-4 rounded-xl shadow-lg bg-gray-900 z-10 flex-shrink-0 mb-8 overflow-x-auto custom-scrollbar">
+        <div class="flex flex-nowrap justify-center gap-4 header-tabs">
+            <button id="tab-journey" class="px-6 py-3 rounded-lg text-lg font-semibold transition-all duration-300 bg-blue-600 text-white shadow-md transform scale-105 whitespace-nowrap">
+                My Trading Journey ✨
+            </button>
+            <button id="tab-holistic_process" class="px-6 py-3 rounded-lg text-lg font-semibold transition-all duration-300 bg-gray-700 text-gray-300 hover:bg-gray-600 whitespace-nowrap">
+                Holistic Process 🧘‍♂️
+            </button>
+            <button id="tab-psychology" class="px-6 py-3 rounded-lg text-lg font-semibold transition-all duration-300 bg-gray-700 text-gray-300 hover:bg-gray-600 whitespace-nowrap">
+                Psychology 🧠
+            </button>
+            <button id="tab-risk_management" class="px-6 py-3 rounded-lg text-lg font-semibold transition-all duration-300 bg-gray-700 text-gray-300 hover:bg-gray-600 whitespace-nowrap">
+                Risk Management 🛡️
+            </button>
+            <button id="tab-gratitude" class="px-6 py-3 rounded-lg text-lg font-semibold transition-all duration-300 bg-gray-700 text-gray-300 hover:bg-gray-600 whitespace-nowrap">
+                Gratitude 🙏
+            </button>
+            <button id="tab-analytics" class="px-6 py-3 rounded-lg text-lg font-semibold transition-all duration-300 bg-gray-700 text-gray-300 hover:bg-gray-600 whitespace-nowrap">
+                Analytics 📊
+            </button>
+        </div>
+    </header>
+
+    <main id="app-content" class="flex-grow flex flex-col items-center p-4 main-content-area">
+
+        <!-- Journey Tab Content (Default Active) -->
+        <div id="content-journey" class="w-full max-w-7xl flex flex-col items-center">
+            <h1 class="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-green-600 mb-8 tracking-wide animate-fade-in-down text-center">
+                Nerdys - HolisticProcess
+            </h1>
+
+            <!-- Upcoming Market Holidays (Conditional Display) -->
+            <div id="upcoming-holidays-container" class="w-full max-w-7xl bg-gray-800 rounded-xl shadow-xl p-4 mb-8 text-center animate-fade-in hidden">
+                <h3 class="text-xl font-semibold text-yellow-300 mb-2">Upcoming Market Holidays 📅</h3>
+                <div id="upcoming-holidays-list" class="flex flex-wrap justify-center gap-2 text-base text-gray-200">
+                    <!-- Holiday info will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Draggable Elements Ribbon (Horizontal Scroll) -->
+            <div id="draggable-elements-ribbon" class="w-full max-w-7xl overflow-x-auto custom-scrollbar p-4 flex flex-row gap-6 mb-8 bg-gray-800 rounded-xl shadow-2xl items-stretch flex-shrink-0 draggable-elements-ribbon">
+                <!-- Draggable elements will be dynamically inserted here by JS -->
+            </div>
+
+            <!-- Main Content Area: Drop Circle and Panels Below -->
+            <div class="flex flex-col w-full max-w-7xl gap-8">
+                <!-- Top Row: Drop Circle & Today's Process Discipline -->
+                <div class="flex flex-col lg:flex-row w-full gap-8 items-stretch">
+                    <div class="flex-1 flex items-center justify-center min-h-[500px] left-circle-area lg:order-1">
+                        <div id="drop-circle" class="relative w-[550px] h-[550px] rounded-full bg-gray-800 border-4 border-dashed border-gray-600 flex flex-col items-center justify-center text-center text-gray-400 text-xl font-medium shadow-inner transition-all duration-300 transform hover:scale-105 hover:border-blue-400 p-8 flex-shrink-0 drop-circle">
+                            <p class="text-2xl font-semibold text-gray-300 hidden">Drag your trading steps here to start your daily journey!</p>
+                            <div id="meditate-placeholder" class="text-8xl animate-breathe-float-glow text-blue-400 hidden">
+                                🧘
+                            </div>
+                            <p id="meditate-text" class="text-2xl text-blue-300 mt-4 hidden">Breathe In: <span id="breathe-in-time">11</span>s, Breathe Out: <span id="breathe-out-time">9</span>s</p>
+                            <!-- New Play/Pause button for breathing animation -->
+                            <button id="breathe-play-pause-btn" class="golden-button mt-4 px-6 py-3 text-lg hidden">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-play"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                                Play Breathe
+                            </button>
+                            <!-- Breath Count Display -->
+                            <div id="breath-count-box" class="golden-button text-xs py-1 px-2 mt-2 hidden">
+                                Breath Count: <span id="breath-count-value">0</span>
+                            </div>
+                            <div id="dropped-items-container" class="flex flex-wrap gap-6 justify-center items-center">
+                                <!-- Dropped items will be dynamically inserted here by JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- New: Today's Process Discipline Panel -->
+                    <div class="flex-1 flex flex-col gap-6 p-6 bg-gray-800 rounded-xl shadow-2xl panel-item lg:order-2">
+                        <h2 class="text-2xl font-bold text-orange-300 mb-2 border-b-2 border-orange-500 pb-2 flex-shrink-0">Today's Process Discipline 🎯</h2>
+                        <div class="flex flex-col items-center justify-center h-full">
+                            <p class="text-gray-300 text-lg mb-4">Process Completion:</p>
+                            <p id="process-completion-percentage" class="text-5xl font-extrabold text-green-400 mb-6">0%</p>
+                            <p class="text-gray-300 text-lg mb-2">Steps Logged:</p>
+                            <p id="steps-logged-count" class="text-4xl font-bold text-blue-400">0 / 5</p>
+                            <p id="process-feedback" class="text-xs text-gray-400 mt-4 text-center">Your discipline is measured by how many of the core trading steps you log each day.</p>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Bottom Row: Daily Observations & Step-by-Step Reflection (Side-by-Side) -->
+                <div class="flex w-full justify-center items-stretch gap-8 mt-8 flex-col lg:flex-row right-panels-area">
+                    <!-- Left Panel: Daily Observations & Chart Readings (New Section) -->
+                    <div class="flex-1 flex flex-col gap-6 p-6 bg-gray-800 rounded-xl shadow-2xl panel-item">
+                        <h2 class="text-2xl font-bold text-teal-300 mb-2 border-b-2 border-teal-500 pb-2 flex-shrink-0">Daily Observations & Chart Readings</h2>
+                        <textarea
+                            id="daily-observations-text"
+                            class="w-full p-3 rounded-lg bg-gray-700 text-gray-100 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-teal-500 resize-y min-h-[150px] flex-shrink-0"
+                            placeholder="Detailed market observations, overall biases, pre-market analysis, and key chart readings..."
+                        ></textarea>
+                        <div class="flex flex-col gap-2 flex-shrink-0">
+                            <label for="chart-image-url" class="block text-gray-300 text-sm font-semibold">Add Chart Snapshot URL (e.g., from Imgur, TradingView export):</label>
+                            <div class="flex gap-2">
+                                <input
+                                    type="text"
+                                    id="chart-image-url"
+                                    class="flex-1 p-2 rounded-lg bg-gray-700 text-gray-100 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                                    placeholder="https://example.com/your-chart.png"
+                                >
+                                <button id="add-chart-snapshot-btn" class="golden-button px-4 py-2 font-semibold">Add</button>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">Note: For direct cloud uploads (Google Drive, Outlook), backend integration is required and is not part of this frontend app. You can paste public image URLs here.</p>
+                        </div>
+                        <div id="chart-snapshots-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+                            <!-- Chart snapshots will be dynamically inserted here -->
+                        </div>
+                    </div>
+
+                    <!-- Right Panel: Daily Step-by-Step Reflection -->
+                    <div class="flex-1 flex flex-col gap-6 p-6 bg-gray-800 rounded-xl shadow-2xl scrollable-panel panel-item">
+                        <h2 class="text-2xl font-bold text-purple-300 mb-2 border-b-2 border-purple-500 pb-2 flex-shrink-0">Daily Step-by-Step Reflection</h2>
+                        <div id="reflection-items-container" class="space-y-4 flex-grow">
+                            <p class="text-gray-400 text-center">No steps added for today. Drag elements to start logging your journey!</p>
+                            <!-- Detailed reflections from dropped items will be inserted here by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- New: Holistic Process Tab Content -->
+        <div id="content-holistic_process" class="w-full max-w-4xl hidden animate-fade-in p-8 bg-gray-800 rounded-xl shadow-2xl text-gray-100">
+            <h2 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-sky-600 mb-6 text-center">The Holistic Trading Process: Path to Financial Freedom 🧘‍♂️📈</h2>
+            <p class="text-lg mb-6 leading-relaxed">
+                Achieving financial freedom through trading isn't just about market analysis; it's about mastering a **holistic process** that integrates keen observation, disciplined execution, psychological resilience, and continuous learning. This structured approach, combined with powerful tools like your custom Pine Scripts, creates a synergistic framework for consistent growth.
+            </p>
+            <hr class="my-6 border-gray-700" />
+
+            <div class="space-y-8">
+                <div>
+                    <h3 class="text-2xl font-bold text-teal-300 mb-2">0. Breathe / Meditate 🧘‍♀️ (Mind-Body Connection)</h3>
+                    <p class="mb-2 text-gray-200">
+                        <strong>What it is:</strong> A pre-market or mid-session mindfulness practice, typically involving controlled breathing or meditation.
+                    </p>
+                    <p class="mb-2 text-gray-200">
+                        <strong>Why it's crucial:</strong> Trading is a highly emotional endeavor. Starting with or integrating meditation grounds you, calms the nervous system, and enhances focus. This prevents impulsive decisions driven by fear or greed, setting a clear, calm mental state essential for rational market participation. It's the bedrock of emotional discipline, ensuring your mind is as sharp as your analysis.
+                    </p>
+                    <p class="mb-2 text-gray-200">
+                        <strong>How it connects to your scripts:</strong> While your scripts provide objective market data, this step ensures your *interpretation* of that data is unbiased. A clear mind helps you trust the signals from tools like `F&O HawkView` and `SymoCIB + Reversals` without second-guessing or emotional interference, allowing their logic to guide your actions effectively.
+                    </p>
+                </div>
+                <hr class="my-6 border-gray-700" />
+                <div>
+                    <h3 class="text-2xl font-bold text-blue-300 mb-2">1. Market Open / Sector Rotation (9:15-10:15) ⏰ (Initial Bias Formation)</h3>
+                    <p class="mb-2 text-gray-200">
+                        <strong>What it is:</strong> Observing the first hour of market activity to identify leading and lagging sectors, unusual volume, and overall market breadth. This sets the initial daily bias.
+                    </p>
+                    <p class="mb-2 text-gray-200">
+                        <strong>Why it's crucial:</strong> The first hour often reveals institutional intent and sets the day's tone. Identifying early strength or weakness in sectors helps you focus your attention on areas with the highest probability of sustained movement, preventing wasted effort on stagnant or unpredictable instruments. This strategic focus is vital for efficient capital deployment and avoiding impulsive trades.
+                    </p>
+                    <p class="mb-2 text-gray-200">
+                        <strong>How it connects to your scripts:</strong> Your `F&O HawkView` script is *specifically designed* for this stage. Its "Sectorial HawkView" summary provides immediate, objective insights into sector strength and rotation right from the open. This data-driven analysis allows you to quickly validate initial observations and align your trading bias with the actual market flow, significantly reducing subjective guesswork.
+                    </p>
+                </div>
+                <hr class="my-6 border-gray-700" />
+                <div>
+                    <h3 class="text-2xl font-bold text-yellow-300 mb-2">2. Sector Deep Dive / Stock Selection 🔬 (High-Probability Filtering)</h3>
+                    <p class="mb-2 text-gray-200">
+                        <strong>What it is:</strong> After identifying strong/weak sectors, this involves drilling down to specific stocks or indices within those sectors that exhibit the best trading characteristics.
+                    </p>
+                    <p class="mb-2 text-gray-200">
+                        <strong>Why it's crucial:</strong> Not all stocks in a strong sector will move equally. This step involves meticulous filtering to find instruments with clear chart structures, ideal volatility, and strong correlation to the sector's momentum. Selecting high-quality setups minimizes random entries and maximizes the potential for favorable risk-reward ratios, a cornerstone of sustainable profitability.
+                    </p>
+                    <p class="mb-2 text-gray-200">
+                        <strong>How it connects to your scripts:</strong> `F&O HawkView`'s detailed F&O symbols list, along with the "Individual Positions" and sorting options, allows you to pinpoint the exact stocks within a hot sector exhibiting strong bullish/bearish signals (e.g., based on OI change, price change). Your `SymoCIB` could also be used here to spot initial signs of order flow imbalance in specific stocks.
+                    </p>
+                </div>
+                <hr class="my-6 border-gray-700" />
+                <div>
+                    <h3 class="text-2xl font-bold text-purple-300 mb-2">3. Order Block / Price Action Analysis 🧱 (Understanding Institutional Footprints)</h3>
+                    <p class="mb-2 text-gray-200">
+                        <strong>What it is:</strong> Analyzing key price levels where significant institutional orders (order blocks) are likely present, or interpreting specific candlestick patterns and price movements (price action).
+                    </p>
+                    <p class="mb-2 text-gray-200">
+                        <strong>Why it's crucial:</strong> Order blocks represent areas where large players accumulate or distribute positions, often acting as strong support or resistance. Understanding price action allows you to read the market's internal dynamics, confirming or rejecting trade ideas. This helps you enter trades at optimal, low-risk locations, riding the wave of professional money and avoiding being trapped by retail noise.
+                    </p>
+                    <p class="mb-2 text-gray-200">
+                        <strong>How it connects to your scripts:</strong> While not directly `Order Block` indicators, your `SymoCIB + Reversals` script helps you identify "Completed Bullish/Bearish Momentum Phases" and "Early Momentum Phases" through its "Smart Money Orders" component (`sSC`, `bSC`). These signals provide confluence with, or alert you to, the presence of significant order flow that might correlate with institutional activity in specific price action zones or potential order blocks.
+                    </p>
+                </div>
+                <hr class="my-6 border-gray-700" />
+                <div>
+                    <h3 class="text-2xl font-bold text-orange-300 mb-2">4. Reversal / Breakout Confirmation 🔄 (Timing Your Entries)</h3>
+                    <p class="mb-2 text-gray-200">
+                        <strong>What it is:</strong> Confirming whether a trend is about to reverse or if price is about to break out from a consolidation pattern.
+                    </p>
+                    <p class="mb-2 text-gray-200">
+                        <strong>Why it's crucial:</strong> This is about precision timing. Entering at the precise moment of a confirmed reversal or breakout dramatically improves your risk-reward and probability of success. Without confirmation, you risk premature entries, false signals, and whipsaws that erode capital and confidence. This discipline reduces chasing price and ensures you're trading with conviction.
+                    </p>
+                    <p class="mb-2 text-gray-200">
+                        <strong>How it connects to your scripts:</strong> Your `SymoCIB + Reversals` script is particularly powerful here. Its "Reversals" and "Smart Money Traps" (if enabled) are designed to provide early warning signals or confirmations of potential turning points or strong directional moves, helping you validate your price action observations and time your entries more effectively.
+                    </p>
+                </div>
+                <hr class="my-6 border-gray-700" />
+                <div>
+                    <h3 class="text-2xl font-bold text-green-300 mb-2">5. External Confirmation (Heatmap/Screener) 🌐 (Broad Market Alignment)</h3>
+                    <p class="mb-2 text-gray-200">
+                        <strong>What it is:</strong> Utilizing external tools (heatmaps, screeners, news sources) to validate your internal analysis and ensure your trade idea aligns with broader market sentiment or fundamental drivers.
+                    </p>
+                    <p class="mb-2 text-gray-200">
+                        <strong>Why it's crucial:</strong> Trading in isolation is dangerous. External confirmation provides a holistic view of market breadth, liquidity, and sentiment. It helps confirm if a strong stock is part of a strong sector (or just an anomaly) and if any major news could impact your trade. This adds an extra layer of conviction and reduces the likelihood of being caught off-guard by external factors.
+                    </p>
+                    <p class="mb-2 text-gray-200">
+                        <strong>How it connects to your scripts:</strong> While `F&O HawkView` gives you detailed sectoral and stock-level data, external screeners (like those from intradayscreener.com, trendlyne.com, tradefinder.in, chartink.com mentioned in your `sites.txt`) provide the macro context. Your scripts help you refine specific trade ideas, while external confirmations ensure these ideas are swimming with the tide of the broader market, as indicated by these sites.
+                    </p>
+                </div>
+                <hr class="my-6 border-gray-700" />
+                <div>
+                    <h3 class="text-2xl font-bold text-cyan-300 mb-2">6. Trade Plan & Entry ✍️ (Disciplined Execution)</h3>
+                    <p class="mb-2 text-gray-200">
+                        <strong>What it is:</strong> Defining precise entry, stop-loss, and target levels, along with position sizing, *before* placing the trade. Then, executing the entry according to this plan.
+                    </p>
+                    <p class="mb-2 text-gray-200">
+                        <strong>Why it's crucial:</strong> This is where preparation meets reality. A well-defined trade plan removes ambiguity and emotional decision-making during live trading. Strict adherence to your stop-loss protects capital, and pre-defined targets ensure you're not overly greedy. Position sizing, based on your risk per trade, is the ultimate capital preservation tool. This step transforms trading from gambling into a calculated business.
+                    </p>
+                    <p class="mb-2 text-gray-200">
+                        <strong>How it connects to your scripts:</strong> Your scripts provide the analytical foundation for *where* to place your entry and stop-loss. For example, `SymoCIB + Reversals` support/resistance levels can act as natural stop-loss or target zones. By combining these objective levels from your scripts with your risk management rules, you build a robust and quantifiable trade plan.
+                    </p>
+                </div>
+                <hr class="my-6 border-gray-700" />
+                <div>
+                    <h3 class="text-2xl font-bold text-indigo-300 mb-2">7. Trade Management / Adjustment ⚙️ (Dynamic Adaptation)</h3>
+                    <p class="mb-2 text-gray-200">
+                        <strong>What it is:</strong> Actively managing an open trade, which may involve trailing stop-losses, partial profit booking, or scaling in/out based on evolving price action and market conditions.
+                    </p>
+                    <p class="mb-2 text-gray-200">
+                        <strong>Why it's crucial:</strong> Markets are dynamic. A trade rarely moves exactly as planned. Effective trade management involves adapting to new information while protecting initial gains or minimizing potential losses. This prevents turning winning trades into losers and helps maximize profits in favorable conditions. It's the art of staying flexible without abandoning your core strategy.
+                    </p>
+                    <p class="mb-2 text-gray-200">
+                        <strong>How it connects to your scripts:</strong> The real-time signals from `F&O HawkView` and `SymoCIB + Reversals` are invaluable here. A sudden shift in sector strength (from HawkView) or a new reversal signal (from SymoCIB) could prompt you to adjust your stop-loss or take partial profits, allowing you to react intelligently to new market information.
+                    </p>
+                </div>
+                <hr class="my-6 border-gray-700" />
+                <div>
+                    <h3 class="text-2xl font-bold text-red-300 mb-2">8. Trade Review / Learning 🧠 (Continuous Improvement)</h3>
+                    <p class="mb-2 text-gray-200">
+                        <strong>What it is:</strong> Objectively reviewing each trade (wins and losses) at the end of the day or week, documenting what went well, what went wrong, and lessons learned.
+                    </p>
+                    <p class="mb-2 text-gray-200">
+                        <strong>Why it's crucial:</strong> This is the engine of growth. Without honest self-assessment, traders repeat the same mistakes. The journal becomes your most valuable learning tool, identifying patterns in your behavior (both successful and detrimental) and refining your strategy. Consistent review is what transforms raw experience into actionable insights, leading to compounding knowledge and ultimately, consistent profitability.
+                    </p>
+                    <p class="mb-2 text-gray-200">
+                        <strong>How it connects to your scripts:</strong> Your journal entries, filled with the "Why" and "How" for each step, provide critical context for reviewing the performance of your `F&O HawkView` and `SymoCIB + Reversals` signals in live market conditions. Did you follow the script's logic? Did it perform as expected? This feedback loop allows you to refine both your trading process and your understanding of the scripts' nuances.
+                    </p>
+                </div>
+            </div>
+            <p class="text-lg mt-8 text-center font-bold text-gray-100">
+                "The desire for financial freedom is a strong motivator, but discipline and a systematic approach are the compass and map."
+            </p>
+        </div>
+
+
+        <!-- Psychology Tab Content -->
+        <div id="content-psychology" class="w-full max-w-4xl hidden animate-fade-in p-8 bg-gray-800 rounded-xl shadow-2xl text-gray-100">
+            <h2 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-teal-600 mb-6 text-center">Trading Psychology: Mastering the Inner Game 🧠</h2>
+            <p class="text-lg mb-6 leading-relaxed">
+                Trading is as much a mental game as it is about technical analysis. Understanding and managing your psychological state is paramount for consistent profitability and long-term survival in the markets. Emotions like fear, greed, hope, and regret can significantly cloud judgment and lead to costly mistakes, even with a perfect strategy.
+            </p>
+            <hr class="my-6 border-gray-700" />
+            <h3 class="text-2xl font-bold text-green-300 mb-4">The Impact of Emotions on Trading</h3>
+            <p class="mb-4 text-gray-200">
+                <strong>Fear</strong> often leads to hesitation, missing opportunities, or exiting winning trades too early. It can also cause paralysis when facing losses. <strong>Greed</strong> drives overtrading, excessive risk-taking, and holding onto losing trades hoping for a miraculous comeback. <strong>Hope</strong> can be detrimental when it prevents you from cutting losses. <strong>Regret</strong> over missed trades or past losses can lead to impulsive, revenge trading.
+            </p>
+            <ul class="list-disc list-inside space-y-2 mb-6 text-gray-200 pl-4">
+                <li><strong>Cognitive Biases:</strong> We are prone to biases like confirmation bias (seeking information that confirms our beliefs) or overconfidence bias, which can distort our perception of risk.</li>
+                <li><strong>Stress & Burnout:</strong> The high-pressure environment can lead to stress, fatigue, and burnout, impacting decision-making capacity.</li>
+            </ul>
+            <hr class="my-6 border-gray-700" />
+            <h3 class="text-2xl font-bold text-green-300 mb-4">Strategies for Psychological Mastery</h3>
+            <h4 class="text-xl font-semibold text-green-400 mb-2">1. Develop a Robust Trading Plan & Stick to It 📜</h4>
+            <p class="mb-4 text-gray-200">
+                A well-defined plan for entries, exits, risk management, and position sizing removes subjective decision-making during live trading. Your journal is a key tool here.
+            </p>
+            <h4 class="text-xl font-semibold text-green-400 mb-2">2. Practice Mindfulness & Self-Awareness 🧘</h4>
+            <p class="mb-4 text-gray-200">
+                Regular self-reflection helps identify emotional triggers. Techniques like meditation or deep breathing before and during trading sessions can help maintain a calm state. Be present and aware of your thoughts and feelings without judgment.
+            </p>
+            <h4 class="text-xl font-semibold text-green-400 mb-2">3. Accept Uncertainty & Probabilities 🎲</h4>
+            <p class="mb-4 text-gray-200">
+                No trade is a guaranteed winner. Trading is about probabilities. Embrace the fact that losses are an inherent part of the game. Focus on consistently executing your high-probability setups.
+            </p>
+            <h4 class="text-xl font-semibold text-green-400 mb-2">4. Control Risk Per Trade 🛡️</h4>
+            <p class="mb-4 text-gray-200">
+                Knowing your maximum potential loss before entering a trade significantly reduces emotional stress. Adhere strictly to your risk management rules.
+            </p>
+            <h4 class="text-xl font-semibold text-green-400 mb-2">5. Review & Learn Without Judgment 📈</h4>
+            <p class="mb-4 text-gray-200">
+                Your trading journal is crucial. After each trading day, objectively review your trades and emotional state. Focus on whether you followed your process, not just the outcome. Learn from mistakes without dwelling on them.
+            </p>
+            <h4 class="text-xl font-semibold text-green-400 mb-2">6. Maintain Physical Well-being 💪</h4>
+            <p class="mb-4 text-gray-200">
+                Adequate sleep, healthy diet, and regular exercise are vital. A tired mind is prone to poor decisions.
+            </p>
+            <p class="text-lg mt-6 text-center font-bold text-gray-100">
+                "The goal of a successful trader is to make the best trades. Money is secondary." - Alexander Elder
+            </p>
+        </div>
+
+        <!-- Risk Management Tab Content -->
+        <div id="content-risk_management" class="w-full max-w-4xl hidden animate-fade-in p-8 bg-gray-800 rounded-xl shadow-2xl text-gray-100">
+            <h2 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-600 mb-6 text-center">Risk Management: Protecting Your Capital 🛡️</h2>
+            <p class="text-lg mb-6 leading-relaxed">
+                Risk management is arguably the single most important factor for long-term survival and success in trading, especially in volatile markets like F&O. It's not about avoiding losses entirely, but about <strong>controlling the size of your losses</strong> so that you can stay in the game and allow your winning trades to compound your capital.
+            </p>
+            <hr class="my-6 border-gray-700" />
+            <h3 class="text-2xl font-bold text-red-300 mb-4">Core Principles of Effective Risk Management</h3>
+            <p class="mb-4 text-gray-200">
+                <strong>1. Define Your Risk Per Trade (RPT) 📉</strong><br/>
+                This is the maximum percentage of your total trading capital you are willing to lose on any single trade. A common recommendation is <strong>1% to 2%</strong> of your capital. For example, if you have a ₹1,00,000 capital and your RPT is 1%, you should not lose more than ₹1,000 on any single trade.
+            </p>
+            <p class="mb-4 text-gray-200">
+                <strong>2. Set Strict Stop Losses 🛑</strong><br/>
+                A stop-loss order is an instruction to close a trade if the price moves against you beyond a predefined point. <strong>Always place your stop-loss order before or immediately after entering a trade.</strong> This is non-negotiable. It defines your maximum loss and protects you from unexpected market moves.
+            </p>
+            <p class="mb-4 text-gray-200">
+                <strong>3. Calculate Position Size Based on RPT & Stop Loss 📏</strong><br/>
+                Your position size should not be arbitrary. It should be calculated based on your risk per trade and the distance to your stop loss.
+                <br/><br/>
+                <strong>Formula:</strong> `Position Size = (Risk Per Trade in Rupees) / (Entry Price - Stop Loss Price)`
+                <br/><br/>
+                For example, if you risk ₹1,000 and your stop loss is ₹10 away from your entry, you can take 100 shares (₹1000 / ₹10). This ensures your actual rupee loss never exceeds your RPT.
+            </p>
+            <p class="mb-4 text-gray-200">
+                <strong>4. Maintain a Favorable Risk-Reward Ratio (RRR) ⚖️</strong><br/>
+                This is the ratio of your potential profit (target) to your potential loss (stop loss). Aim for trades with an RRR of <strong>1:2 or higher</strong>. This means for every ₹1 you risk, you aim to make at least ₹2. Even if you only win 50% of your trades, you'll still be profitable.
+            </p>
+            <p class="mb-4 text-gray-200">
+                <strong>5. Avoid Overleveraging 🚫</strong><br/>
+                Especially in F&O markets, leverage can magnify both profits and losses. Use leverage judiciously and always with a clear understanding of your position sizing.
+            </p>
+            <p class="mb-4 text-gray-200">
+                <strong>6. Limit Daily/Weekly Losses 📅</strong><br/>
+                Set a maximum loss you're willing to accept for a day or a week. If you hit this limit, stop trading. This prevents "revenge trading" and protects your capital from significant drawdowns.
+            </p>
+            <hr class="my-6 border-gray-700" />
+            <h3 class="text-2xl font-bold text-red-300 mb-4">Practical Application</h3>
+            <p class="mb-4 text-gray-200">
+                Consistently apply these rules. Review your risk management at the end of each day using your trading journal. Ask yourself: Did I follow my RPT? Did I place my stop loss? Was my position size correct? Over time, diligent risk management will be the bedrock of your trading consistency.
+            </p>
+            <p class="text-lg mt-6 text-center font-bold text-gray-100">
+                "In this business, if you're good, you're right six times out of ten. You're never going to be right nine times out of ten. So, you have to be able to lose money intelligently." - Marty Schwartz
+            </p>
+        </div>
+
+        <!-- Gratitude Tab Content -->
+        <div id="content-gratitude" class="w-full max-w-4xl hidden animate-fade-in p-8 bg-gray-800 rounded-xl shadow-2xl text-gray-100">
+            <h2 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-amber-600 mb-6 text-center">Gratitude in Trading: A Mindset for Success 🙏</h2>
+            <p class="text-lg mb-6 leading-relaxed">
+                While often overlooked, cultivating gratitude is a powerful psychological tool for traders. It shifts your focus from what you lack (e.g., missed profits, past losses) to what you have (e.g., the opportunity to trade, lessons learned, capital to manage). This positive shift can significantly reduce stress, enhance focus, and improve overall decision-making.
+            </p>
+            <hr class="my-6 border-gray-700" />
+            <h3 class="text-2xl font-bold text-yellow-300 mb-4">Why is Gratitude Important for Traders?</h3>
+            <p class="mb-4 text-gray-200">
+                <strong>Reduces Emotional Reactivity:</strong> When you're grateful, you're less likely to be consumed by anger or frustration after a losing trade, preventing impulsive "revenge trading."<br/>
+                <strong>Fosters Patience and Discipline:</strong> Gratitude for the learning process, even through setbacks, encourages you to stick to your plan rather than chasing quick profits.<br/>
+                <strong>Enhances Learning from Losses:</strong> Instead of viewing losses as failures, gratitude helps you see them as valuable lessons, essential for growth.<br/>
+                <strong>Boosts Resilience:</strong> It helps you bounce back faster from drawdowns by focusing on the broader journey and progress.<br/>
+                <strong>Improves Focus:</strong> A mind filled with gratitude is less distracted by negativity, allowing for clearer analysis and execution.<br/>
+                <strong>Attracts Abundance (Mindset Shift):</strong> A positive, appreciative mindset can subconsciously lead to better decisions and outcomes.
+            </p>
+            <hr class="my-6 border-gray-700" />
+            <h3 class="text-2xl font-bold text-yellow-300 mb-4">Practical Ways to Integrate Gratitude into Your Trading Routine</h3>
+            <p class="mb-4 text-gray-200">
+                <strong>1. Pre-Market Gratitude Ritual ✨</strong><br/>
+                Before the market opens, take 5 minutes to list what you're grateful for related to your trading journey. This could be the capital you have, the access to information, your learning opportunities, or simply the chance to participate. This sets a positive tone for the day.
+            </p>
+            <p class="mb-4 text-gray-200">
+                <strong>2. Post-Trade Reflection (Win or Loss) 🙏</strong><br/>
+                After every trade, regardless of outcome, practice gratitude:
+                <ul class="list-circle list-inside mt-2 ml-4">
+                    <li><strong>For Wins:</strong> Be grateful for the profit and for the successful execution of your strategy. Acknowledge your discipline.</li>
+                    <li><strong>For Losses:</strong> Be grateful for the lesson learned. Reframe it as tuition paid for valuable knowledge. "Thank you for showing me what doesn't work."</li>
+                </ul>
+            </p>
+            <p class="mb-4 text-gray-200">
+                <strong>3. Keep a Gratitude Journal for Trading ✍️</strong><br/>
+                Dedicate a section in your trading journal specifically for gratitude. At the end of each day or week, jot down specific things you're grateful for related to your trading, even small ones. Examples:
+                <ul class="list-circle list-inside mt-2 ml-4">
+                    <li>"Grateful I followed my stop loss, minimizing loss."</li>
+                    <li>"Grateful for patiently waiting for my setup today."</li>
+                    <li>"Grateful for the clear sector rotation insights from my script."</li>
+                    <li>"Grateful for the resilience to come back after a challenging morning."</li>
+                </ul>
+            </p>
+            <p class="mb-4 text-gray-200">
+                <strong>4. Appreciate Your Trading Capital 💰</strong><br/>
+                Recognize that your trading capital is a tool that allows you to participate in the markets. Be grateful for it and treat it with respect, which naturally leads to better risk management.
+            </p>
+            <p class="text-lg mt-6 text-center font-bold text-gray-100">
+                "Develop an attitude of gratitude, and give thanks for everything that happens to you, knowing that every step forward is a step toward achieving something bigger and better than your current situation." - Brian Tracy
+            </p>
+        </div>
+
+        <!-- Analytics Tab Content -->
+        <div id="content-analytics" class="w-full max-w-7xl hidden animate-fade-in p-8 bg-gray-800 rounded-xl shadow-2xl text-gray-100">
+            <h2 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-green-600 mb-6 text-center">Process & Mindset Metrics 📊</h2>
+            <p class="text-lg mb-6 leading-relaxed text-center">
+                Track your daily process adherence, engagement, and consistency over time to gain deeper insights into your trading habits.
+            </p>
+            <hr class="my-6 border-gray-700" />
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-gray-700 p-6 rounded-lg shadow-md border border-gray-600">
+                    <h3 class="text-xl font-semibold text-blue-300 mb-4">Daily Process Completion (%)</h3>
+                    <div class="chart-container h-64 md:h-80"><canvas id="daily-process-chart"></canvas></div>
+                    <p class="text-sm text-gray-400 mt-3">Percentage of trading steps logged each day (last 7 days).</p>
+                </div>
+
+                <div class="bg-gray-700 p-6 rounded-lg shadow-md border border-gray-600">
+                    <h3 class="text-xl font-semibold text-purple-300 mb-4">Weekly Process Completion (%)</h3>
+                    <div class="chart-container h-64 md:h-80"><canvas id="weekly-process-chart"></canvas></div>
+                    <p class="text-sm text-gray-400 mt-3">Average process completion over the last 4 weeks.</p>
+                </div>
+
+                <div class="bg-gray-700 p-6 rounded-lg shadow-md border border-gray-600 lg:col-span-2">
+                    <h3 class="text-xl font-semibold text-teal-300 mb-4">Monthly Process Completion (%)</h3>
+                    <div class="chart-container h-72 md:h-96"><canvas id="monthly-process-chart"></canvas></div>
+                    <p class="text-sm text-gray-400 mt-3">Average process completion over the last 6 months.</p>
+                </div>
+
+                <div class="bg-gray-700 p-6 rounded-lg shadow-md border border-gray-600">
+                    <h3 class="text-xl font-semibold text-orange-300 mb-4">Daily Logged Steps Count</h3>
+                    <div class="chart-container h-64 md:h-80"><canvas id="daily-steps-chart"></canvas></div>
+                    <p class="text-sm text-gray-400 mt-3">Number of individual trading steps you logged each day (last 7 days).</p>
+                </div>
+
+                <div class="bg-gray-700 p-6 rounded-lg shadow-md border border-gray-600">
+                    <h3 class="text-xl font-semibold text-yellow-300 mb-4">Daily General Notes Logged</h3>
+                    <div class="chart-container h-64 md:h-80"><canvas id="daily-notes-chart"></canvas></div>
+                    <p class="text-sm text-gray-400 mt-3">Indicator if general notes were added for each day (last 7 days).</p>
+                </div>
+            </div>
+            <p class="text-base text-gray-300 mt-8 text-center">
+                Consistency in your trading process and diligent journaling are key to long-term success. These metrics help you identify trends and areas for improvement in your discipline and reflection.
+            </p>
+        </div>
+    </main>
+
+    <!-- Bottom Ribbon for Date Picker and Download (MOVED ABOVE FOOTER) -->
+    <div class="w-full bg-gray-900 p-4 flex justify-center items-center gap-4 shadow-2xl z-20 flex-wrap flex-shrink-0 date-ribbon">
+        <div class="flex items-center gap-4">
+            <label for="journey-date-bottom" class="text-lg font-semibold text-gray-200">Select Day:</label>
+            <input
+                type="date"
+                id="journey-date-bottom"
+                class="p-2 rounded-md bg-gray-700 text-gray-100 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer text-center"
+            />
+        </div>
+        <p class="text-sm text-gray-400">Viewing: <span id="current-date-display" class="font-bold text-blue-300"></span></p>
+        <div id="save-indicator" class="text-sm text-green-400 font-semibold opacity-0 transition-opacity duration-300">
+            Saved Automatically!
+        </div>
+        <button id="export-json-btn" class="golden-button px-4 py-2 font-semibold">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+            Export
+        </button>
+        <label for="import-json-input" class="golden-button px-4 py-2 font-semibold cursor-pointer">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-upload"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+            Import
+        </label>
+        <input type="file" id="import-json-input" accept=".json" class="hidden">
+        <button id="delete-all-data-btn" class="golden-button danger px-4 py-2 font-semibold">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+            Delete All Data
+        </button>
+    </div>
+
+    <!-- Notes Modal -->
+    <div id="notes-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 animate-fade-in hidden">
+        <div class="bg-gray-900 rounded-xl shadow-2xl p-8 w-full max-w-md border-2 border-blue-500 transform scale-95 animate-fade-in-down">
+            <h3 id="modal-title" class="text-3xl font-bold text-white mb-4 text-center">Add Notes</h3>
+            <p class="text-gray-300 text-center mb-6">Reflect on why and how you performed this step.</p>
+
+            <div class="mb-4">
+                <label for="modal-why-notes" class="block text-blue-300 text-lg font-semibold mb-2">Why did you do this?</label>
+                <textarea
+                    id="modal-why-notes"
+                    class="w-full p-3 rounded-lg bg-gray-700 text-gray-100 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y min-h-[80px]"
+                    placeholder="Enter your reasoning here..."
+                ></textarea>
+            </div>
+
+            <div class="mb-6">
+                <label for="modal-how-notes" class="block text-blue-300 text-lg font-semibold mb-2">How did you execute this?</label>
+                <textarea
+                    id="modal-how-notes"
+                    class="w-full p-3 rounded-lg bg-gray-700 text-gray-100 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y min-h-[80px]"
+                    placeholder="Describe your actions and observations..."
+                ></textarea>
+            </div>
+
+            <div class="flex justify-end gap-4">
+                <button id="modal-cancel-btn" class="golden-button px-6 py-3 font-semibold">
+                    Cancel
+                </button>
+                <button id="modal-save-btn" class="golden-button px-6 py-3 font-semibold transform hover:scale-105 active:scale-95 animate-pulse-once">
+                    Add to Journey
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal (for Delete All Data) -->
+    <div id="confirmation-modal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 animate-fade-in hidden">
+        <div class="bg-gray-900 rounded-xl shadow-2xl p-8 w-full max-w-sm border-2 border-red-500 transform scale-95 animate-fade-in-down text-center">
+            <h3 class="text-2xl font-bold text-red-400 mb-4">Are you sure?</h3>
+            <p class="text-gray-300 mb-6">This action will <strong class="text-red-300">permanently delete ALL your journal data</strong>. This cannot be undone.</p>
+            <div class="flex justify-center gap-4">
+                <button id="confirm-cancel-btn" class="golden-button px-6 py-3 font-semibold">
+                    Cancel
+                </button>
+                <button id="confirm-delete-btn" class="golden-button danger px-6 py-3 font-semibold">
+                    Delete All
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Footer -->
+    <footer class="app-footer">
+        Designed with <span class="heart-pulse">❤️</span> <a href="https://www.instagram.com/nerdyintruder/" target="_blank" class="nerdyintruder-link">@Nerdyintruder</a>
+    </footer>
+
+    <script>
+        // --- Global Variables ---
+        let selectedDate = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+        let droppedItems = [];
+        let dailyObservationsText = '';
+        let chartSnapshots = [];
+        let dailyProcessMetrics = {};
+        let currentItemToNote = null; // Stores item being edited/noted in modal
+        let activeTab = 'journey'; // Default active tab
+        let isBreathingAnimationActive = false; // Track breathing animation state
+        let breatheInterval;
+        let breatheTimer;
+        let breatheCurrentPhase = 'in'; // 'in', 'pause_in_out', 'out', 'pause_out_in'
+        let breatheRemainingTime = 0;
+        let breathCount = 0; // New: To track breath cycles
+
+        // Market trading hours (IST)
+        const MARKET_OPEN_HOUR = 9;
+        const MARKET_OPEN_MINUTE = 15;
+        const MARKET_CLOSE_HOUR = 15; // 3 PM
+        const MARKET_CLOSE_MINUTE = 30; // 3:30 PM
+
+        // Minimum steps for "Good" discipline (excluding optional 'breathe' if only present)
+        const MIN_STEPS_FOR_GOOD_DISCIPLINE = 5;
+
+        // Market Holidays for 2025 (YYYY-MM-DD format for easy comparison)
+        const marketHolidays = new Set([
+            '2025-02-26', // Mahashivratri
+            '2025-03-14', // Holi
+            '2025-03-31', // Id-Ul-Fitr (Ramadan Eid)
+            '2025-04-10', // Shri Mahavir Jayanti
+            '2025-04-14', // Dr. Baba Saheb Ambedkar Jayanti
+            '2025-04-18', // Good Friday
+            '2025-05-01', // Maharashtra Day
+            '2025-08-15', // Independence Day / Parsi New Year
+            '2025-08-27', // Shri Ganesh Chaturthi
+            '2025-10-02', // Mahatma Gandhi Jayanti/Dussehra
+            '2025-10-21', // Diwali Laxmi Pujan
+            '2025-10-22', // Balipratipada
+            '2025-11-05', // Prakash Gurpurb Sri Guru Nanak Dev
+            '2025-12-25'  // Christmas
+        ]);
+
+        // A small map for holiday names, to make display more informative
+        const marketHolidaysMap = {
+            '2025-02-26': 'Mahashivratri',
+            '2025-03-14': 'Holi',
+            '2025-03-31': 'Id-Ul-Fitr (Ramadan Eid)',
+            '2025-04-10': 'Shri Mahavir Jayanti',
+            '2025-04-14': 'Dr. Baba Saheb Ambedkar Jayanti',
+            '2025-04-18': 'Good Friday',
+            '2025-05-01': 'Maharashtra Day',
+            '2025-08-15': 'Independence Day / Parsi New Year',
+            '2025-08-27': 'Shri Ganesh Chaturthi',
+            '2025-10-02': 'Mahatma Gandhi Jayanti/Dussehra',
+            '2025-10-21': 'Diwali Laxmi Pujan',
+            '2025-10-22': 'Balipratipada',
+            '2025-11-05': 'Prakash Gurpurb Sri Guru Nanak Dev',
+            '2025-12-25': 'Christmas'
+        };
+
+        const draggableElements = [
+            { id: 'breathe_meditate', name: 'Breathe / Meditate', icon: '🧘', rank: 0,
+                prompts: {
+                    why: "Why did you choose to meditate/breathe before or during trading? (e.g., to calm emotions, gain clarity, reset after a difficult trade)",
+                    how: "Describe your meditation/breathing practice. (e.g., '10 minutes of deep diaphragmatic breathing', 'focused on detaching from outcomes', 'used a guided meditation app')"
+                },
+                breathTimes: { in: 11, out: 9, pause: 3 } // Specific breath times, added pause
+            },
+            { id: 'market_open_observation', name: 'Market Open / Sector Rotation (9:15-10:15)', icon: '⏰', rank: 1,
+                prompts: {
+                    why: "Why did you identify these sectors as top/worst performers? (e.g., strong volume, clear momentum, breaking news, correlation with global markets)",
+                    how: "How did you analyze this? (e.g., SymoCIB's sector strength summary, initial balance breakouts, identifying key price action patterns like opening range expansion)"
+                }
+            },
+            { id: 'sector_deep_dive', name: 'Sector Deep Dive / Stock Selection', icon: '🔬', rank: 2,
+                prompts: {
+                    why: "Why did you choose these specific stocks within the identified sectors? (e.g., leading/lagging stock, high/low IV, strong chart structure, alignment with sector move)",
+                    how: "What specific criteria did you use? (e.g., F&O HawkView's bullish/bearish signals, VWAP confluence, Fibonacci retracements, order flow analysis near initial balance, previous day's data)"
+                }
+            },
+            { id: 'order_block_pa', name: 'Order Block / Price Action Analysis', icon: '🧱', rank: 3,
+                prompts: {
+                    why: "Why was this particular Order Block or Price Action pattern significant for your trade idea? (e.g., large institutional footprints, liquidity absorption, strong reaction point, continuation/reversal pattern)",
+                    how: "How did you confirm its validity? (e.g., confluence with support/resistance, volume profile, candlestick patterns, multiple time frame alignment, supply/demand zones)"
+                }
+            },
+            { id: 'reversal_breakout', name: 'Reversal / Breakout Confirmation', icon: '🔄', rank: 4,
+                prompts: {
+                    why: "What evidence led you to believe a reversal or breakout was imminent? (e.g., exhaustion candles, shift in momentum, trendline break, consolidation pattern completion, volume confirmation)",
+                    how: "How did you confirm the setup? (e.g., SymoCIB's reversal signals, specific chart patterns like flags/pennants, break of key levels, retest of breakout zones, increased volatility)"
+                }
+            },
+            { id: 'external_confirmation', name: 'External Confirmation (Heatmap/Screener)', icon: '🌐', rank: 5,
+                prompts: {
+                    why: "Why did you seek external confirmation, and what specific bias were you confirming? (e.g., validating sector strength, checking broad market sentiment, confirming liquidity, cross-referencing news catalysts)",
+                    how: "Which external sites/screeners did you use, and what data points provided the confirmation? (e.g., IntradayScreener for market breadth, Trendlyne heatmap for sectoral/stock strength, Chartink VWAP screener for multi-timeframe VWAP alignment, TradeFinder for broad market cues)"
+                }
+            },
+            { id: 'trade_plan_entry', name: 'Trade Plan & Entry', icon: '✍️', rank: 6,
+                prompts: {
+                    why: "What was your precise trade plan (entry price, stop loss, target, position size)? What was the risk-reward? Why this specific setup?",
+                    how: "How did you execute the entry? (e.g., specific order type: market/limit, time of entry, price fill observation, platform used)"
+                }
+            },
+            { id: 'trade_management', name: 'Trade Management / Adjustment', icon: '⚙️', rank: 7,
+                prompts: {
+                    why: "Why did you make adjustments (e.g., trailing stop, partial profit booking, scaling in/out)? Was it due to price action, news, or a change in market conditions?",
+                    how: "What specific actions did you take to manage the trade? (e.g., moved stop to breakeven, booked 50% at R1, scaled out on resistance, re-entered on pullback)"
+                }
+            },
+            { id: 'trade_review', name: 'Trade Review / Learning', icon: '🧠', rank: 8,
+                prompts: {
+                    why: "Why is this trade important for reflection and future learning? (e.g., adherence to plan, unexpected market reaction, psychological challenge, exceptional setup)",
+                    how: "What were the key takeaways? What went well and what went wrong? What will you improve or replicate in your next trades? (e.g., 'Need to wait for stronger volume confirmation on breakouts', 'Excellent discipline on stop loss placement')"
+                }
+            },
+        ];
+
+        // --- DOM Elements ---
+        const appContent = document.getElementById('app-content');
+        const notesModal = document.getElementById('notes-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalWhyNotes = document.getElementById('modal-why-notes');
+        const modalHowNotes = document.getElementById('modal-how-notes');
+        const modalSaveBtn = document.getElementById('modal-save-btn');
+        const modalCancelBtn = document.getElementById('modal-cancel-btn');
+        const dropCircle = document.getElementById('drop-circle');
+        const droppedItemsContainer = document.getElementById('dropped-items-container');
+        const meditatePlaceholder = document.getElementById('meditate-placeholder');
+        const meditateText = document.getElementById('meditate-text');
+        const breatheInTime = document.getElementById('breathe-in-time');
+        const breatheOutTime = document.getElementById('breathe-out-time');
+        const breathePlayPauseBtn = document.getElementById('breathe-play-pause-btn');
+        const breathCountBox = document.getElementById('breath-count-box'); // New breath count display
+        const breathCountValue = document.getElementById('breath-count-value'); // New breath count value
+
+
+        const reflectionItemsContainer = document.getElementById('reflection-items-container');
+        const dailyObservationsTextarea = document.getElementById('daily-observations-text');
+        const chartImageUrlInput = document.getElementById('chart-image-url');
+        const addChartSnapshotBtn = document.getElementById('add-chart-snapshot-btn');
+        const chartSnapshotsContainer = document.getElementById('chart-snapshots-container');
+        const datePickerBottom = document.getElementById('journey-date-bottom');
+        const currentDateDisplay = document.getElementById('current-date-display');
+        const saveIndicator = document.getElementById('save-indicator');
+        const deleteAllDataBtn = document.getElementById('delete-all-data-btn');
+        const confirmationModal = document.getElementById('confirmation-modal');
+        const confirmCancelBtn = document.getElementById('confirm-cancel-btn');
+        const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+        const draggableElementsRibbon = document.getElementById('draggable-elements-ribbon');
+
+        // New JSON Import/Export Buttons
+        const exportJsonBtn = document.getElementById('export-json-btn');
+        const importJsonInput = document.getElementById('import-json-input');
+
+        // Market Insight Display Elements
+        const nextSessionCountdownElem = document.getElementById('next-session-countdown');
+        const sessionsMonthElem = document.getElementById('sessions-month');
+        const sessionsYearElem = document.getElementById('sessions-year');
+        const upcomingHolidaysContainer = document.getElementById('upcoming-holidays-container'); // Container for conditional visibility
+        const upcomingHolidaysList = document.getElementById('upcoming-holidays-list');
+
+        // Process Discipline Elements
+        const processCompletionPercentageElem = document.getElementById('process-completion-percentage');
+        const stepsLoggedCountElem = document.getElementById('steps-logged-count');
+        const processFeedbackElem = document.getElementById('process-feedback');
+
+
+        // --- Chart Related Variables ---
+        let isChartJsReady = false;
+        let chartInstances = {}; // Store Chart.js instances to destroy them later
+
+        // --- Event Listeners ---
+        window.onload = function() {
+            initApp();
+        };
+
+        function initApp() {
+            // Check and register Chart.js plugins repeatedly until ready
+            const checkChartLoad = setInterval(() => {
+                if (typeof Chart !== 'undefined' && Chart.register && typeof window.ChartDataLabels !== 'undefined' && window.ChartDataLabels.id) {
+                    clearInterval(checkChartLoad); // Stop checking once loaded
+                    Chart.register(window.ChartDataLabels); // Register ChartDataLabels plugin
+                    isChartJsReady = true; // Set flag to true
+                    console.log("Chart.js and ChartDataLabels plugin registered successfully.");
+                    // Now that Chart.js is ready, we can safely render analytics if the tab is active
+                    if (activeTab === 'analytics') {
+                        renderProcessMetricsCharts();
+                    }
+                } else {
+                    console.log("Waiting for Chart.js and ChartDataLabels to load...");
+                }
+            }, 100); // Check every 100ms
+
+            setupEventListeners();
+            renderDraggableElements();
+            loadDailyProcessMetrics();
+            updateDateDisplay();
+            loadJournalEntries(selectedDate);
+            showTab(activeTab); // Show the default tab
+            updateMarketInfo(); // Initial update of market info
+            setInterval(updateMarketInfo, 1000); // Update countdown every second
+            renderUpcomingHolidays(); // Render holidays on init
+        }
+
+        function setupEventListeners() {
+            // Tab switching
+            document.querySelectorAll('header button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    activeTab = e.target.id.replace('tab-', ''); // Update active tab state
+                    showTab(activeTab);
+                    // Update button active state
+                    document.querySelectorAll('header button').forEach(btn => {
+                        // Remove active classes
+                        btn.classList.remove('active'); // Remove the active class first
+                        btn.classList.remove('bg-blue-600', 'text-white', 'shadow-md', 'transform', 'scale-105');
+                        btn.classList.add('bg-gray-700', 'text-gray-300', 'hover:bg-gray-600');
+                    });
+                    e.target.classList.add('active', 'bg-blue-600', 'text-white', 'shadow-md', 'transform', 'scale-105'); // Add active class to the clicked button
+                });
+            });
+
+            // Drag & Drop for circle
+            dropCircle.addEventListener('dragover', handleDragOver);
+            dropCircle.addEventListener('dragleave', handleDragLeave);
+            dropCircle.addEventListener('drop', handleDrop);
+            
+            // Breathing Play/Pause Button
+            breathePlayPauseBtn.addEventListener('click', () => {
+                if (isBreathingAnimationActive) {
+                    stopBreathingAnimation();
+                    breathePlayPauseBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-play"><polygon points="5 3 19 12 5 21 5 3"/></svg> Play Breathe`;
+                } else {
+                    startBreathingAnimation();
+                    breathePlayPauseBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pause"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> Pause Breathe`;
+                }
+            });
+
+            // Modal event listeners
+            modalSaveBtn.addEventListener('click', handleSaveItemNotes);
+            modalCancelBtn.addEventListener('click', () => {
+                notesModal.classList.add('hidden');
+                currentItemToNote = null;
+            });
+            // Close modal on escape key
+            notesModal.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    notesModal.classList.add('hidden');
+                    currentItemToNote = null;
+                }
+            });
+
+            // Date Picker
+            datePickerBottom.addEventListener('change', handleDateChange);
+
+            // Daily Observations Textarea auto-save
+            dailyObservationsTextarea.addEventListener('input', () => {
+                dailyObservationsText = dailyObservationsTextarea.value;
+                saveJournalEntry(selectedDate, droppedItems, dailyObservationsText, chartSnapshots);
+            });
+
+            // Add Chart Snapshot
+            addChartSnapshotBtn.addEventListener('click', addChartSnapshot);
+            chartImageUrlInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault(); // Prevent form submission if part of a form
+                    addChartSnapshot();
+                }
+            });
+
+            // Delete All Data Button
+            deleteAllDataBtn.addEventListener('click', () => {
+                confirmationModal.classList.remove('hidden');
+            });
+
+            confirmCancelBtn.addEventListener('click', () => {
+                confirmationModal.classList.add('hidden');
+            });
+
+            confirmDeleteBtn.addEventListener('click', () => {
+                deleteAllJournalData();
+                confirmationModal.classList.add('hidden');
+            });
+
+            // JSON Import/Export
+            exportJsonBtn.addEventListener('click', exportData);
+            importJsonInput.addEventListener('change', importData);
+        }
+
+        function showTab(tabName) {
+            // First, hide all content divs
+            document.querySelectorAll('#app-content > div').forEach(contentDiv => {
+                if (contentDiv) { // Add null check here to prevent the error
+                    contentDiv.classList.add('hidden');
+                }
+            });
+            // Then, show only the requested tab
+            const targetTabContent = document.getElementById(`content-${tabName}`);
+            if (targetTabContent) { // Add null check here
+                targetTabContent.classList.remove('hidden');
+            } else {
+                console.error(`Error: Tab content with ID 'content-${tabName}' not found.`);
+            }
+
+
+            // If switching to analytics, render charts
+            if (tabName === 'analytics' && isChartJsReady) {
+                renderProcessMetricsCharts();
+            } else if (tabName !== 'analytics' && isChartJsReady) {
+                destroyAllCharts();
+            }
+        }
+
+        function renderDraggableElements() {
+            draggableElementsRibbon.innerHTML = ''; // Clear existing
+            const sortedDraggables = draggableElements.sort((a,b) => a.rank - b.rank);
+            sortedDraggables.forEach(element => {
+                const div = document.createElement('div');
+                div.id = `draggable-${element.id}`;
+                div.draggable = true;
+                div.className = "flex flex-col items-center justify-center p-4 bg-gray-700 rounded-xl shadow-lg cursor-grab active:cursor-grabbing transform transition-all duration-200 hover:scale-105 hover:bg-gray-600 focus:outline-none focus:ring-4 focus:ring-blue-500/50 group relative overflow-hidden min-w-[200px] text-center flex-shrink-0";
+                div.innerHTML = `
+                    <span class="text-5xl mb-2 transition-transform duration-300 group-hover:scale-110">${element.icon}</span>
+                    <div class="flex-1 flex flex-col justify-center">
+                        <span class="text-lg font-semibold text-gray-100 leading-tight">${element.rank}. ${element.name}</span> <!-- Added rank number -->
+                        <p class="text-xs text-gray-400 mt-1">Drag to journal</p>
+                    </div>
+                    <div class="absolute inset-0 bg-blue-600 opacity-0 group-hover:opacity-10 transition-opacity duration-300 rounded-xl"></div>
+                `;
+                div.addEventListener('dragstart', (e) => handleDragStart(e, element.id));
+                div.addEventListener('dragend', handleDragEnd);
+                draggableElementsRibbon.appendChild(div);
+            });
+        }
+
+        // --- Drag & Drop Handlers ---
+        function handleDragStart(e, id) {
+            e.dataTransfer.setData('text/plain', id);
+            e.currentTarget.classList.add('opacity-50', 'ring-4', 'ring-blue-500');
+        }
+
+        function handleDragEnd(e) {
+            e.currentTarget.classList.remove('opacity-50', 'ring-4', 'ring-blue-500');
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('border-blue-400', 'shadow-xl', 'animate-pulse-border');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('border-blue-400', 'shadow-xl', 'animate-pulse-border');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('border-blue-400', 'shadow-xl', 'animate-pulse-border');
+            const id = e.dataTransfer.getData('text/plain');
+
+            const droppedElement = draggableElements.find((el) => el.id === id);
+
+            if (droppedElement && !droppedItems.some(item => item.id === id)) {
+                // This is a new item being dropped
+                currentItemToNote = {
+                    id: droppedElement.id,
+                    name: droppedElement.name,
+                    icon: droppedElement.icon,
+                    rank: droppedElement.rank,
+                    prompts: droppedElement.prompts,
+                    timestamp: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }),
+                    why: '',
+                    how: '',
+                    breathTimes: droppedElement.breathTimes // Include breath times if applicable
+                };
+                openNotesModal(currentItemToNote, true); // Open modal for new item
+            } else if (droppedElement) {
+                // Visual feedback if item already exists
+                const itemElement = document.getElementById(`dropped-${id}`);
+                if (itemElement) {
+                    itemElement.classList.add('animate-pulse-once');
+                    setTimeout(() => {
+                        itemElement.classList.remove('animate-pulse-once');
+                    }, 500);
+                }
+            }
+        }
+
+        function startBreathingAnimation() {
+            if (isBreathingAnimationActive) return; // Prevent duplicate starts
+            isBreathingAnimationActive = true;
+            stopBreathingAnimationIntervals(); // Clear any previous intervals
+
+            dropCircle.classList.remove('animate-pulse-border'); // Remove default border animation
+            meditatePlaceholder.classList.remove('hidden');
+            meditateText.classList.remove('hidden');
+            breathCountBox.classList.remove('hidden'); // Show breath count box
+            breathePlayPauseBtn.classList.remove('hidden'); // Show play/pause button
+            breathePlayPauseBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pause"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> Pause Breathe`;
+            dropCircle.querySelector('p').classList.add('hidden'); // Hide "Drag your steps here"
+
+            const breatheItem = draggableElements.find(el => el.id === 'breathe_meditate');
+            const breatheInDuration = breatheItem?.breathTimes?.in || 11;
+            const breatheOutDuration = breatheItem?.breathTimes?.out || 9;
+            const breathePauseDuration = breatheItem?.breathTimes?.pause || 3;
+
+            const runPhase = () => {
+                dropCircle.classList.remove('breathe-in-animation', 'breathe-out-animation', 'breathe-pause-animation');
+                clearInterval(breatheTimer); // Clear previous phase timer
+
+                if (breatheCurrentPhase === 'in') {
+                    dropCircle.style.setProperty('--breathe-in-duration', `${breatheInDuration}s`);
+                    dropCircle.classList.add('breathe-in-animation');
+                    breatheRemainingTime = breatheInDuration;
+                    breatheInTime.textContent = breatheRemainingTime;
+                    meditateText.textContent = `Breathe In: ${breatheRemainingTime}s`;
+                    breatheTimer = setInterval(() => {
+                        breatheRemainingTime--;
+                        breatheInTime.textContent = breatheRemainingTime;
+                        meditateText.textContent = `Breathe In: ${breatheRemainingTime}s`;
+                        if (breatheRemainingTime <= 0) {
+                            clearInterval(breatheTimer);
+                            breatheCurrentPhase = 'pause_in_out';
+                            runPhase(); // Start pause after in
+                        }
+                    }, 1000);
+                } else if (breatheCurrentPhase === 'pause_in_out') {
+                    dropCircle.classList.add('breathe-pause-animation'); // Apply pause style
+                    meditateText.textContent = `Pause: ${breathePauseDuration}s`;
+                    breatheRemainingTime = breathePauseDuration;
+                    breatheTimer = setInterval(() => {
+                        breatheRemainingTime--;
+                        meditateText.textContent = `Pause: ${breatheRemainingTime}s`;
+                        if (breatheRemainingTime <= 0) {
+                            clearInterval(breatheTimer);
+                            breatheCurrentPhase = 'out';
+                            runPhase(); // Start out after pause
+                        }
+                    }, 1000);
+                } else if (breatheCurrentPhase === 'out') {
+                    dropCircle.style.setProperty('--breathe-out-duration', `${breatheOutDuration}s`);
+                    dropCircle.classList.add('breathe-out-animation');
+                    breatheRemainingTime = breatheOutDuration;
+                    breatheOutTime.textContent = breatheRemainingTime;
+                    meditateText.textContent = `Breathe Out: ${breatheRemainingTime}s`;
+                    breatheTimer = setInterval(() => {
+                        breatheRemainingTime--;
+                        breatheOutTime.textContent = breatheRemainingTime;
+                        meditateText.textContent = `Breathe Out: ${breatheRemainingTime}s`;
+                        if (breatheRemainingTime <= 0) {
+                            clearInterval(breatheTimer);
+                            breathCount++; // Increment breath count after a full cycle
+                            breathCountValue.textContent = breathCount;
+                            breatheCurrentPhase = 'pause_out_in';
+                            runPhase(); // Start pause after out
+                        }
+                    }, 1000);
+                } else if (breatheCurrentPhase === 'pause_out_in') {
+                    dropCircle.classList.add('breathe-pause-animation'); // Apply pause style
+                    meditateText.textContent = `Pause: ${breathePauseDuration}s`;
+                    breatheRemainingTime = breathePauseDuration;
+                    breatheTimer = setInterval(() => {
+                        breatheRemainingTime--;
+                        meditateText.textContent = `Pause: ${breatheRemainingTime}s`;
+                        if (breatheRemainingTime <= 0) {
+                            clearInterval(breatheTimer);
+                            breatheCurrentPhase = 'in';
+                            runPhase(); // Restart cycle
+                        }
+                    }, 1000);
+                }
+            };
+
+            // Initialize breath count for the day
+            const savedBreathCount = JSON.parse(localStorage.getItem(`breath_count_${selectedDate}`) || '0');
+            breathCount = savedBreathCount;
+            breathCountValue.textContent = breathCount;
+
+            breatheCurrentPhase = 'in'; // Always start with 'in'
+            runPhase(); // Start the first phase immediately
+        }
+
+        function stopBreathingAnimationIntervals() {
+            clearInterval(breatheInterval);
+            clearInterval(breatheTimer);
+            dropCircle.classList.remove('breathe-in-animation', 'breathe-out-animation', 'breathe-pause-animation');
+        }
+
+        function stopBreathingAnimation() {
+            isBreathingAnimationActive = false;
+            stopBreathingAnimationIntervals(); // Clear all intervals
+            dropCircle.classList.add('animate-pulse-border'); // Re-apply default border animation
+            meditatePlaceholder.classList.remove('hidden'); // Ensure emoji is visible
+            meditateText.classList.remove('hidden'); // Ensure text is visible
+            meditateText.textContent = `Breathe In: 11s, Breathe Out: 9s`; // Reset text
+            breathePlayPauseBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-play"><polygon points="5 3 19 12 5 21 5 3"/></svg> Play Breathe`;
+            
+            // Only hide the initial message if items are dropped, otherwise show play button
+            if (droppedItems.length === 0) {
+                dropCircle.querySelector('p').classList.remove('hidden'); // Show "Drag your steps here"
+                breathePlayPauseBtn.classList.remove('hidden'); // Keep play button visible
+                breathCountBox.classList.add('hidden'); // Hide count box if no items
+            } else {
+                dropCircle.querySelector('p').classList.add('hidden'); // Keep hidden if items
+                breathePlayPauseBtn.classList.add('hidden'); // Hide play button if items are dropped
+                breathCountBox.classList.add('hidden'); // Hide count box if items are dropped
+            }
+        }
+
+
+        function openNotesModal(item, isNew = false) {
+            currentItemToNote = item;
+            modalTitle.textContent = `Notes for "${item.name}"`;
+            modalWhyNotes.value = item.why;
+            modalWhyNotes.placeholder = item.prompts.why || "Enter your reasoning here...";
+            modalHowNotes.value = item.how;
+            modalHowNotes.placeholder = item.prompts.how || "Describe your actions and observations...";
+
+            // Change button text based on whether it's a new item or existing one being edited
+            modalSaveBtn.textContent = isNew ? "Add to Journey" : "Save Notes";
+
+            notesModal.classList.remove('hidden');
+            modalWhyNotes.focus();
+        }
+
+        function handleSaveItemNotes() {
+            if (currentItemToNote) {
+                const isExistingItem = droppedItems.some(item => item.id === currentItemToNote.id);
+
+                if (isExistingItem) {
+                    // Update existing item
+                    droppedItems = droppedItems.map(item =>
+                        item.id === currentItemToNote.id
+                            ? { ...item, why: modalWhyNotes.value.trim(), how: modalHowNotes.value.trim() }
+                            : item
+                    );
+                } else {
+                    // Add new item
+                    currentItemToNote.why = modalWhyNotes.value.trim();
+                    currentItemToNote.how = modalHowNotes.value.trim();
+                    droppedItems.push(currentItemToNote);
+                }
+
+                droppedItems.sort((a, b) => a.rank - b.rank); // Sort by rank
+
+                renderDroppedItems(); // Re-render the circle and reflection panels
+                updateProcessDiscipline(); // Update process discipline metrics
+                saveJournalEntry(selectedDate, droppedItems, dailyObservationsText, chartSnapshots);
+
+                notesModal.classList.add('hidden');
+                currentItemToNote = null;
+            }
+        }
+
+        function removeItem(idToRemove) {
+            droppedItems = droppedItems.filter(item => item.id !== idToRemove);
+            renderDroppedItems();
+            updateProcessDiscipline(); // Update process discipline metrics
+            saveJournalEntry(selectedDate, droppedItems, dailyObservationsText, chartSnapshots);
+        }
+
+        function renderDroppedItems() {
+            droppedItemsContainer.innerHTML = ''; // Clear circle items
+            reflectionItemsContainer.innerHTML = ''; // Clear reflection panel
+            
+            // Default hidden state for meditative elements, play button, and breath count
+            meditatePlaceholder.classList.add('hidden');
+            meditateText.classList.add('hidden');
+            breathePlayPauseBtn.classList.add('hidden');
+            breathCountBox.classList.add('hidden');
+            dropCircle.querySelector('p').classList.add('hidden'); // Hide original "Drag your steps" text
+
+            if (droppedItems.length === 0) {
+                // Show meditate elements, play button, and reset breath count when no items are dropped
+                meditatePlaceholder.classList.remove('hidden');
+                meditateText.classList.remove('hidden');
+                breathePlayPauseBtn.classList.remove('hidden'); // Make the play button visible
+                // Ensure breathe times are set for the placeholder
+                const breatheItem = draggableElements.find(el => el.id === 'breathe_meditate');
+                breatheInTime.textContent = breatheItem?.breathTimes?.in || 11;
+                breatheOutTime.textContent = breatheItem?.breathTimes?.out || 9;
+                meditateText.textContent = `Breathe In: ${breatheInTime.textContent}s, Breathe Out: ${breatheOutTime.textContent}s`;
+                
+                reflectionItemsContainer.innerHTML = '<p class="text-gray-400 text-center">No steps added for today. Drag elements to start logging your journey!</p>';
+                
+                // Ensure breathing animation is stopped if no items, and play button is shown
+                if (isBreathingAnimationActive) {
+                    stopBreathingAnimation(); // This also handles button state
+                } else {
+                     breathePlayPauseBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-play"><polygon points="5 3 19 12 5 21 5 3"/></svg> Play Breathe`;
+                }
+                breathCount = JSON.parse(localStorage.getItem(`breath_count_${selectedDate}`) || '0');
+                breathCountValue.textContent = breathCount;
+                if (breathCount > 0) {
+                    breathCountBox.classList.remove('hidden');
+                }
+                return;
+            } else {
+                // If items are dropped, ensure breathing animation is stopped and its controls are hidden
+                if (isBreathingAnimationActive) {
+                    stopBreathingAnimation();
+                }
+            }
+
+            droppedItems.forEach(item => {
+                // Render in the circle
+                const circleItemDiv = document.createElement('div');
+                circleItemDiv.id = `dropped-${item.id}`;
+                circleItemDiv.className = "flex flex-col items-center justify-center p-4 rounded-full shadow-lg relative group cursor-pointer transform transition-all duration-200 hover:scale-105 w-24 h-24 text-wrap circle-item"; /* Added circle-item class */
+                circleItemDiv.innerHTML = `
+                    <span class="text-4xl font-bold mb-1">${item.rank}. ${item.icon}</span> <!-- Simplified: Rank + Emoji ONLY -->
+                    <button class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400 z-10 remove-btn" aria-label="Remove ${item.name}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                    </button>
+                    <!-- Popup details for HOVER only -->
+                    <div class="absolute inset-0 bg-opacity-95 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4 text-left flex flex-col justify-center items-start text-xs popup-details z-30">
+                        <p class="font-bold mb-1">${item.name}</p> 
+                        <p class="text-xs text-gray-400 mb-2">${item.timestamp}</p>
+                        ${item.id === 'breathe_meditate' ? `<p class="font-bold text-blue-300">Breath: ${item.breathTimes.in}s In, ${item.breathTimes.out}s Out</p>` : ''}
+                        <p class="text-sm mb-1"><span class="font-bold">Why:</span> ${item.why}</p>
+                        <p class="text-sm"><span class="font-bold">How:</span> ${item.how}</p>
+                    </div>
+                `;
+                circleItemDiv.querySelector('button').addEventListener('click', (e) => {
+                    e.stopPropagation(); // Prevent opening modal when clicking remove
+                    removeItem(item.id)
+                });
+                // Click on the circle item itself will open the notes modal for editing
+                circleItemDiv.addEventListener('click', () => openNotesModal(item, false));
+                droppedItemsContainer.appendChild(circleItemDiv);
+            });
+
+            // Render in the reflection panel (numbered list)
+            reflectionItemsContainer.innerHTML = ''; // Clear existing content
+            droppedItems.forEach((item, index) => {
+                const reflectionItemDiv = document.createElement('div');
+                reflectionItemDiv.className = "reflection-item-wrapper bg-gray-700 p-4 rounded-lg shadow-md border border-gray-600 animate-fade-in";
+                reflectionItemDiv.innerHTML = `
+                    <p class="text-lg font-semibold text-blue-300 flex items-center gap-2 mb-1">
+                        <span class="font-bold mr-2 text-xl">${item.rank}.</span> <span class="text-2xl">${item.icon}</span> ${item.name}
+                    </p>
+                    <p class="text-xs text-gray-400 mb-2">${item.timestamp}</p>
+                    ${item.id === 'breathe_meditate' ? `<p class="text-blue-200 text-sm font-semibold">Breath: ${item.breathTimes.in}s In, ${item.breathTimes.out}s Out</p>` : ''}
+                    <p class="text-gray-200 text-sm"><span class="font-bold">Why:</span> ${item.why}</p>
+                    <p class="text-gray-200 text-sm"><span class="font-bold">How:</span> ${item.how}</p>
+                `;
+                reflectionItemsContainer.appendChild(reflectionItemDiv);
+            });
+
+            if (droppedItems.length === 0) {
+                reflectionItemsContainer.innerHTML = '<p class="text-gray-400 text-center">No steps added for today. Drag elements to start logging your journey!</p>';
+            }
+        }
+
+        function addChartSnapshot() {
+            const imageUrl = chartImageUrlInput.value.trim();
+            if (imageUrl) {
+                const newSnapshot = { url: imageUrl, timestamp: new Date().toLocaleString() };
+                chartSnapshots.push(newSnapshot);
+                renderChartSnapshots();
+                saveJournalEntry(selectedDate, droppedItems, dailyObservationsText, chartSnapshots);
+                chartImageUrlInput.value = ''; // Clear input
+            }
+        }
+
+        function removeChartSnapshot(timestampToRemove) {
+            chartSnapshots = chartSnapshots.filter(snapshot => snapshot.timestamp !== timestampToRemove);
+            renderChartSnapshots();
+            saveJournalEntry(selectedDate, droppedItems, dailyObservationsText, chartSnapshots);
+        }
+
+        function renderChartSnapshots() {
+            chartSnapshotsContainer.innerHTML = '';
+            if (chartSnapshots.length === 0) {
+                chartSnapshotsContainer.innerHTML = '<p class="text-gray-400 text-center col-span-full">No chart snapshots added yet.</p>';
+            }
+            chartSnapshots.forEach(snapshot => {
+                const snapshotDiv = document.createElement('div');
+                snapshotDiv.className = "relative group chart-snapshot-item";
+                snapshotDiv.innerHTML = `
+                    <img src="${snapshot.url}" alt="Chart Snapshot" class="w-full h-auto rounded-lg shadow-md border border-gray-600">
+                    <button class="absolute top-2 right-2 bg-red-600 text-white rounded-full w-7 h-7 flex items-center justify-center text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-200" aria-label="Remove snapshot">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                    </button>
+                    <p class="text-xs text-gray-400 mt-1 text-center">${snapshot.timestamp}</p>
+                `;
+                snapshotDiv.querySelector('button').addEventListener('click', () => removeChartSnapshot(snapshot.timestamp));
+                chartSnapshotsContainer.appendChild(snapshotDiv);
+            });
+        }
+
+        // --- Local Storage Functions ---
+        function saveJournalEntry(date, dropped, observations, snapshots) {
+            try {
+                const allJourneys = JSON.parse(localStorage.getItem('trading_journeys') || '{}');
+                allJourneys[date] = { droppedItems: dropped, dailyObservationsText: observations, chartSnapshots: snapshots };
+                localStorage.setItem('trading_journeys', JSON.stringify(allJourneys));
+                console.log(`Journal for ${date} saved.`);
+
+                // Update daily process metrics
+                const coreStepsLogged = dropped.filter(item => item.id !== 'breathe_meditate').length;
+                let actualStepsForDiscipline = coreStepsLogged;
+
+                // If 'breathe_meditate' is present and no other core steps, and MIN_STEPS_FOR_GOOD_DISCIPLINE is 1, count it.
+                // Otherwise, if 'breathe_meditate' is present with other steps, it contributes to the count.
+                if (dropped.some(item => item.id === 'breathe_meditate')) {
+                    if (coreStepsLogged === 0 && MIN_STEPS_FOR_GOOD_DISCIPLINE === 1) {
+                         actualStepsForDiscipline = 1;
+                    } else if (coreStepsLogged > 0) {
+                        actualStepsForDiscipline = coreStepsLogged + 1; // Count breathe as an additional step if other steps are present
+                    }
+                }
+                
+                const totalTarget = MIN_STEPS_FOR_GOOD_DISCIPLINE;
+                let processPercentage = (actualStepsForDiscipline / totalTarget) * 100;
+                processPercentage = parseFloat(processPercentage.toFixed(2));
+                processPercentage = Math.min(100, processPercentage); // Cap at 100%
+
+                const notesLogged = observations.trim().length > 0 ? 1 : 0;
+
+                const updatedMetrics = {
+                    ...dailyProcessMetrics,
+                    [date]: {
+                        droppedStepCount: actualStepsForDiscipline,
+                        totalTargetSteps: totalTarget,
+                        processPercentage: processPercentage,
+                        notesLogged: notesLogged
+                    }
+                };
+                dailyProcessMetrics = updatedMetrics; // Update global variable
+                localStorage.setItem('trading_journey_metrics', JSON.stringify(updatedMetrics));
+                localStorage.setItem(`breath_count_${selectedDate}`, breathCount.toString()); // Save breath count
+
+                // Visual feedback for auto-save
+                saveIndicator.classList.remove('opacity-0');
+                saveIndicator.classList.add('animate-fade-in-out');
+                setTimeout(() => {
+                    saveIndicator.classList.remove('animate-fade-in-out');
+                    saveIndicator.classList.add('opacity-0');
+                }, 2000);
+            } catch (e) {
+                console.error("Failed to save to localStorage:", e);
+                // alert("Error: Could not save your journal entry. Your browser might be in private mode or storage is full.");
+            }
+        }
+
+        function loadJournalEntries(date) {
+            try {
+                const allJourneys = JSON.parse(localStorage.getItem('trading_journeys') || '{}');
+                const entry = allJourneys[date] || { droppedItems: [], dailyObservationsText: '', chartSnapshots: [] };
+                droppedItems = entry.droppedItems.sort((a, b) => a.rank - b.rank);
+                dailyObservationsText = entry.dailyObservationsText;
+                chartSnapshots = entry.chartSnapshots || []; // Ensure it's an array, default empty
+                dailyObservationsTextarea.value = dailyObservationsText;
+
+                breathCount = parseInt(localStorage.getItem(`breath_count_${selectedDate}`) || '0'); // Load breath count
+                breathCountValue.textContent = breathCount;
+
+                renderDroppedItems(); // Re-render the circle and reflection panels
+                renderChartSnapshots(); // Re-render chart snapshots
+                updateProcessDiscipline(); // Update process discipline metrics
+                console.log(`Journal for ${date} loaded.`);
+            } catch (e) {
+                console.error("Failed to load from localStorage:", e);
+                droppedItems = [];
+                dailyObservationsText = '';
+                chartSnapshots = [];
+                dailyProcessMetrics = {};
+                dailyObservationsTextarea.value = '';
+                breathCount = 0;
+                breathCountValue.textContent = 0;
+                renderDroppedItems();
+                renderChartSnapshots();
+                updateProcessDiscipline();
+            }
+        }
+
+        function loadDailyProcessMetrics() {
+            try {
+                const metrics = JSON.parse(localStorage.getItem('trading_journey_metrics') || '{}');
+                dailyProcessMetrics = metrics;
+                console.log("Daily process metrics loaded:", metrics);
+            } catch (e) {
+                console.error("Failed to load daily process metrics:", e);
+                dailyProcessMetrics = {};
+            }
+        }
+
+        function handleDateChange(e) {
+            const newDate = e.target.value;
+            saveJournalEntry(selectedDate, droppedItems, dailyObservationsText, chartSnapshots); // Save current day's notes
+            selectedDate = newDate;
+            updateDateDisplay();
+            loadJournalEntries(selectedDate); // Load new day's notes
+        }
+
+        function updateDateDisplay() {
+            currentDateDisplay.textContent = selectedDate;
+            datePickerBottom.value = selectedDate; // Set date picker value
+        }
+
+        function deleteAllJournalData() {
+            localStorage.removeItem('trading_journeys');
+            localStorage.removeItem('trading_journey_metrics');
+            localStorage.clear(); // Clear all localStorage for a fresh start including breath counts
+            droppedItems = [];
+            dailyObservationsText = '';
+            chartSnapshots = [];
+            dailyProcessMetrics = {};
+            breathCount = 0; // Reset breath count
+            renderDroppedItems();
+            renderChartSnapshots();
+            updateProcessDiscipline();
+            alert("All journal data has been deleted."); // Using alert for critical error
+        }
+
+        // --- JSON Export/Import Functions ---
+        function exportData() {
+            try {
+                // Collect all relevant data from localStorage, including breath counts
+                const allLocalStorageKeys = Object.keys(localStorage);
+                const dataToExport = {};
+
+                allLocalStorageKeys.forEach(key => {
+                    dataToExport[key] = localStorage.getItem(key);
+                });
+
+                const dataStr = JSON.stringify(dataToExport, null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `trading_journey_backup_${new Date().toISOString().slice(0, 10)}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showSaveSuccess();
+            } catch (e) {
+                console.error("Failed to export data:", e);
+                alert("Error: Could not export data. Check console for details."); // Using alert for critical error
+            }
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) {
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    if (typeof importedData === 'object' && importedData !== null) {
+                        // Clear existing localStorage before importing
+                        localStorage.clear();
+
+                        for (const key in importedData) {
+                            if (Object.hasOwnProperty.call(importedData, key)) {
+                                localStorage.setItem(key, importedData[key]);
+                            }
+                        }
+                        
+                        loadDailyProcessMetrics(); // Reload metrics after import
+                        loadJournalEntries(selectedDate); // Reload current day's data
+                        showSaveSuccess();
+                        alert("Data imported successfully!"); // Using alert for feedback
+                    } else {
+                        alert("Error: Invalid JSON structure for import. Expected an object."); // Using alert for critical error
+                    }
+                } catch (e) {
+                    console.error("Failed to import data:", e);
+                    alert("Error: Failed to parse JSON file or import data."); // Using alert for critical error
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = ''; // Clear the file input
+        }
+
+        function showSaveSuccess() {
+            saveIndicator.classList.remove('opacity-0');
+            saveIndicator.classList.add('animate-fade-in-out');
+            setTimeout(() => {
+                saveIndicator.classList.remove('animate-fade-in-out');
+                saveIndicator.classList.add('opacity-0');
+            }, 2000);
+        }
+
+        // --- Process Discipline Calculation and Display ---
+        function updateProcessDiscipline() {
+            // Count core steps for discipline calculation
+            const coreStepsLogged = droppedItems.filter(item => item.id !== 'breathe_meditate').length;
+            let actualStepsForDiscipline = coreStepsLogged;
+
+            // If 'breathe_meditate' is present, and there are other core steps, it adds to the count.
+            // If it's the only step logged, and MIN_STEPS_FOR_GOOD_DISCIPLINE is 1, it counts as 1.
+            if (droppedItems.some(item => item.id === 'breathe_meditate')) {
+                if (coreStepsLogged > 0) {
+                    actualStepsForDiscipline = coreStepsLogged + 1; // Breathe + other steps
+                } else if (MIN_STEPS_FOR_GOOD_DISCIPLINE === 1) {
+                    actualStepsForDiscipline = 1; // Only breathe, and target is 1
+                } else {
+                    actualStepsForDiscipline = 0; // Only breathe, but target is >1, so it doesn't count towards core.
+                }
+            }
+            
+            const totalTarget = MIN_STEPS_FOR_GOOD_DISCIPLINE;
+            let processPercentage = (actualStepsForDiscipline / totalTarget) * 100;
+            processPercentage = parseFloat(processPercentage.toFixed(2));
+            processPercentage = Math.min(100, processPercentage); // Cap at 100%
+
+            const currentDayMetrics = {
+                droppedStepCount: actualStepsForDiscipline,
+                totalTargetSteps: totalTarget,
+                processPercentage: processPercentage,
+                notesLogged: dailyObservationsText.trim().length > 0 ? 1 : 0
+            };
+
+            stepsLoggedCountElem.textContent = `${actualStepsForDiscipline} / ${totalTarget} steps`;
+            processCompletionPercentageElem.textContent = `${processPercentage}%`;
+
+            if (processPercentage >= 100) {
+                processCompletionPercentageElem.className = 'text-5xl font-extrabold text-green-400 mb-6';
+            } else if (processPercentage >= 75) {
+                processCompletionPercentageElem.className = 'text-5xl font-extrabold text-blue-400 mb-6';
+            } else if (processPercentage >= 50) {
+                processCompletionPercentageElem.className = 'text-5xl font-extrabold text-yellow-400 mb-6';
+            } else {
+                processCompletionPercentageElem.className = 'text-5xl font-extrabold text-red-400 mb-6';
+            }
+
+            if (actualStepsForDiscipline >= totalTarget) {
+                processFeedbackElem.textContent = `Excellent! 100% Process Discipline! 🎉`;
+            } else if (actualStepsForDiscipline > 0) {
+                processFeedbackElem.textContent = `Keep going! You've logged ${actualStepsForDiscipline} steps today. 💪`;
+            } else {
+                processFeedbackElem.textContent = "Start logging your journey to build discipline. 🚀";
+            }
+
+            // Update global metrics object and save
+            dailyProcessMetrics[selectedDate] = currentDayMetrics;
+            localStorage.setItem('trading_journey_metrics', JSON.stringify(dailyProcessMetrics));
+
+            // Ensure meditating emoji and play button are shown only when no items are dropped
+            if (droppedItems.length === 0) {
+                meditatePlaceholder.classList.remove('hidden');
+                meditateText.classList.remove('hidden');
+                breathePlayPauseBtn.classList.remove('hidden');
+                // Only show breath count box if breathCount > 0
+                if (breathCount > 0) {
+                    breathCountBox.classList.remove('hidden');
+                } else {
+                    breathCountBox.classList.add('hidden');
+                }
+                dropCircle.querySelector('p').classList.add('hidden'); // Hide original "Drag your steps" text
+            } else {
+                meditatePlaceholder.classList.add('hidden');
+                meditateText.classList.add('hidden');
+                breathePlayPauseBtn.classList.add('hidden'); // Hide play button if items are dropped
+                breathCountBox.classList.add('hidden'); // Hide count box if items are dropped
+                dropCircle.querySelector('p').classList.add('hidden'); // Ensure original text remains hidden
+            }
+        }
+
+
+        // --- Date and Time Utilities for Market Info ---
+
+        /**
+         * Checks if a given date is a weekend (Saturday or Sunday).
+         * @param {Date} date
+         * @returns {boolean}
+         */
+        function isWeekend(date) {
+            const day = date.getDay();
+            return day === 0 || day === 6; // 0 for Sunday, 6 for Saturday
+        }
+
+        /**
+         * Checks if a given date is a market holiday.
+         * @param {Date} date
+         * @returns {boolean}
+         */
+        function isMarketHoliday(date) {
+            const dateString = date.toISOString().slice(0, 10);
+            return marketHolidays.has(dateString);
+        }
+
+        /**
+         * Checks if a given date is a valid trading day.
+         * @param {Date} date
+         * @returns {boolean}
+         */
+        function isTradingDay(date) {
+            return !isWeekend(date) && !isMarketHoliday(date);
+        }
+
+        /**
+         * Formats a time difference into readable Dd Hh Mm Ss string.
+         * @param {number} milliseconds - Time difference in milliseconds.
+         * @returns {string} Formatted time string.
+         */
+        function formatTimeDifference(milliseconds) {
+            if (milliseconds < 0) {
+                return "0s"; // Should not happen with correct logic, but for safety
+            }
+            const totalSeconds = Math.floor(milliseconds / 1000);
+            const days = Math.floor(totalSeconds / (3600 * 24));
+            const hours = Math.floor((totalSeconds % (3600 * 24)) / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+
+            let parts = [];
+            if (days > 0) parts.push(`${days}d`);
+            if (hours > 0) parts.push(`${hours}h`);
+            if (minutes > 0) parts.push(`${minutes}m`);
+            parts.push(`${seconds}s`); // Always show seconds
+
+            return parts.join(' ');
+        }
+
+        /**
+         * Finds the next trading session info (open/close time, day of week).
+         * @returns {{date: Date, dayOfWeek: string, isMarketOpen: boolean, remainingTimePurpose: string}}
+         * date: The target Date object for the countdown (either market open or close).
+         * dayOfWeek: The day of the week for `date`.
+         * isMarketOpen: True if market is currently open.
+         * remainingTimePurpose: 'Closes in' or 'Opens in'.
+         */
+        function getNextTradingSessionInfo() {
+            const now = new Date();
+            const nowIST = new Date(now.toLocaleString('en-US', {timeZone: 'Asia/Kolkata'}));
+
+            const marketOpenTodayIST = new Date(nowIST);
+            marketOpenTodayIST.setHours(MARKET_OPEN_HOUR, MARKET_OPEN_MINUTE, 0, 0);
+
+            const marketCloseTodayIST = new Date(nowIST);
+            marketCloseTodayIST.setHours(MARKET_CLOSE_HOUR, MARKET_CLOSE_MINUTE, 0, 0);
+
+            let targetTime = null;
+            let isMarketCurrentlyOpen = false;
+            let remainingTimePurpose = 'Opens in';
+
+            // 1. Check if market is currently open
+            if (isTradingDay(nowIST) && nowIST.getTime() >= marketOpenTodayIST.getTime() && nowIST.getTime() < marketCloseTodayIST.getTime()) {
+                isMarketCurrentlyOpen = true;
+                targetTime = marketCloseTodayIST;
+                remainingTimePurpose = 'Closes in';
+            }
+            // 2. Market is closed or it's a non-trading day, find next open
+            else {
+                let tempDate = new Date(nowIST);
+                // If current time is after today's market close, or today is a non-trading day, start checking from tomorrow
+                if (nowIST.getTime() >= marketCloseTodayIST.getTime() || !isTradingDay(nowIST)) {
+                    tempDate.setDate(tempDate.getDate() + 1);
+                }
+                tempDate.setHours(MARKET_OPEN_HOUR, MARKET_OPEN_MINUTE, 0, 0); // Set to next open time
+
+                while (!isTradingDay(tempDate)) {
+                    tempDate.setDate(tempDate.getDate() + 1);
+                }
+                targetTime = tempDate;
+                remainingTimePurpose = 'Opens in';
+            }
+
+            const dayOfWeek = targetTime.toLocaleDateString('en-US', { weekday: 'short' }); // "Mon"
+            const dateOfMonth = targetTime.getDate(); // "11"
+            const yearShort = targetTime.getFullYear().toString().slice(-2); // "25"
+            const formattedDate = `${dateOfMonth} - ${dayOfWeek} - ${yearShort}`;
+
+            return { date: targetTime, formattedDate: formattedDate, isMarketOpen: isMarketCurrentlyOpen, remainingTimePurpose: remainingTimePurpose };
+        }
+
+
+        /**
+         * Counts the number of trading sessions from the "effective start of today" up to an end date (inclusive).
+         * "Effective start of today" means:
+         * - If market is currently open: count starts today.
+         * - If market is closed for today: count starts tomorrow.
+         * Excludes weekends and market holidays.
+         * @param {Date} endDate - The ending date (inclusive).
+         * @returns {number} The count of trading sessions.
+         */
+        function countTradingSessionsFromNowToEndDate(endDate) {
+            let count = 0;
+            const now = new Date();
+            const nowIST = new Date(now.toLocaleString('en-US', {timeZone: 'Asia/Kolkata'}));
+
+            const marketCloseTodayIST = new Date(nowIST);
+            marketCloseTodayIST.setHours(MARKET_CLOSE_HOUR, MARKET_CLOSE_MINUTE, 0, 0);
+
+            let currentDayIterator = new Date(nowIST.getFullYear(), nowIST.getMonth(), nowIST.getDate()); // Start from beginning of current IST day
+
+            // If market is closed for today OR it's a non-trading day, start counting from tomorrow.
+            // Otherwise, start counting from today.
+            if (nowIST.getTime() >= marketCloseTodayIST.getTime() || !isTradingDay(currentDayIterator)) {
+                currentDayIterator.setDate(currentDayIterator.getDate() + 1);
+            }
+
+            // Ensure endDate is normalized to end of its day for comparison
+            endDate.setHours(23, 59, 59, 999);
+
+            while (currentDayIterator.getTime() <= endDate.getTime()) {
+                if (isTradingDay(currentDayIterator)) {
+                    count++;
+                }
+                currentDayIterator.setDate(currentDayIterator.getDate() + 1);
+            }
+            return count;
+        }
+
+
+        function updateMarketInfo() {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth(); // 0-indexed
+
+            const { date: targetTime, formattedDate, isMarketOpen, remainingTimePurpose } = getNextTradingSessionInfo();
+            const timeDiff = targetTime.getTime() - now.getTime(); // Difference in milliseconds between now and target time
+
+            let countdownString = formatTimeDifference(timeDiff);
+
+            if (isMarketOpen) {
+                nextSessionCountdownElem.innerHTML = `<span>${formattedDate}</span> <span class="text-green-400">OPEN!</span> ${remainingTimePurpose}: ${countdownString}`;
+            } else {
+                 nextSessionCountdownElem.innerHTML = `<span>${formattedDate}</span> ${remainingTimePurpose}: ${countdownString}`;
+            }
+
+
+            // --- Sessions Remaining This Month ---
+            const endOfMonth = new Date(currentYear, currentMonth + 1, 0); // Last day of current month
+            let sessionsInMonth = countTradingSessionsFromNowToEndDate(endOfMonth);
+            sessionsMonthElem.textContent = sessionsInMonth;
+
+            // --- Sessions Remaining This Year ---
+            const endOfYear = new Date(currentYear, 11, 31); // Last day of current year
+            let sessionsInYear = countTradingSessionsFromNowToEndDate(endOfYear);
+            sessionsYearElem.textContent = sessionsInYear;
+        }
+
+        function renderUpcomingHolidays() {
+            upcomingHolidaysList.innerHTML = '';
+            const today = new Date();
+            today.setHours(0,0,0,0);
+
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(0,0,0,0); // Normalize to start of tomorrow
+
+            let holidayTomorrow = null;
+
+            // Check if tomorrow is a market holiday
+            if (isMarketHoliday(tomorrow)) {
+                const dateStringTomorrow = tomorrow.toISOString().slice(0, 10);
+                holidayTomorrow = { date: tomorrow, name: marketHolidaysMap[dateStringTomorrow] };
+            }
+
+            if (holidayTomorrow) {
+                const dayOfWeek = holidayTomorrow.date.toLocaleDateString('en-US', { weekday: 'long' });
+                const formattedDate = holidayTomorrow.date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+
+                const holidayItem = document.createElement('span');
+                holidayItem.className = "flex flex-row items-center bg-yellow-700 text-white px-3 py-1 rounded-full shadow-md text-sm";
+                holidayItem.innerHTML = `
+                    <span class="mr-1">🎉</span> Market Holiday Tomorrow: <strong>${formattedDate} (${dayOfWeek})</strong> - ${holidayTomorrow.name}
+                `;
+                upcomingHolidaysList.appendChild(holidayItem);
+                upcomingHolidaysContainer.classList.remove('hidden'); // Show the container
+            } else {
+                upcomingHolidaysContainer.classList.add('hidden'); // Hide the container if no holiday tomorrow
+            }
+        }
+
+
+        // --- Chart Functions ---
+        function destroyAllCharts() {
+            if (Chart && Chart.helpers && Chart.instances) {
+                Object.values(Chart.instances).forEach(chartInstance => {
+                    if (chartInstance) { // Ensure instance exists before destroying
+                        chartInstance.destroy();
+                    }
+                });
+            } else {
+                console.warn("Chart.js not fully ready or no instances to destroy, or already destroyed. Skipping destroyAllCharts.");
+            }
+        }
+
+
+        function renderProcessMetricsCharts() {
+            if (!isChartJsReady) {
+                console.warn("Chart.js is not ready yet. Skipping chart rendering.");
+                return;
+            }
+
+            destroyAllCharts(); // Clear existing charts
+
+            const isDarkTheme = document.documentElement.classList.contains('dark');
+            const textColor = getComputedStyle(document.documentElement).getPropertyValue('--chart-text-color').trim();
+            const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--chart-grid-color').trim();
+            const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-primary').trim();
+            const accentColor = '#a855f7'; // Keep purple for consistency with meditation
+            const greenColor = '#22c55e'; // Tailwind green-500 equivalent
+
+            const chartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { color: textColor } },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--card-bg').trim() + 'd0', /* Add opacity */
+                        borderColor: getComputedStyle(document.documentElement).getPropertyValue('--border-color').trim(),
+                        borderWidth: 1,
+                        titleColor: textColor,
+                        bodyColor: textColor,
+                    },
+                    datalabels: { display: false } // Default off for all charts, enable explicitly if needed
+                },
+                scales: {
+                    x: {
+                        ticks: { color: textColor },
+                        grid: { color: gridColor }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: textColor },
+                        grid: { color: gridColor }
+                    }
+                }
+            };
+
+            const sortedDates = Object.keys(dailyProcessMetrics).sort();
+
+            // 1. Daily Process Completion (Last 7 Days)
+            const recentMetrics = sortedDates.slice(Math.max(0, sortedDates.length - 7));
+            const dailyProcessLabels = recentMetrics.map(date => date.slice(5)); // MMDD
+            const dailyProcessData = recentMetrics.map(date => dailyProcessMetrics[date].processPercentage);
+
+            const dailyProcessCtx = document.getElementById('daily-process-chart');
+            if (dailyProcessCtx) {
+                chartInstances.dailyProcessChart = new Chart(dailyProcessCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: dailyProcessLabels,
+                        datasets: [{
+                            label: 'Process Completion (%)',
+                            data: dailyProcessData,
+                            backgroundColor: dailyProcessData.map(p => p >= 75 ? greenColor : (p >= 50 ? primaryColor : 'orange')),
+                            borderColor: dailyProcessData.map(p => p >= 75 ? greenColor : (p >= 50 ? primaryColor : 'darkorange')),
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        ...chartOptions,
+                        scales: {
+                            x: { ...chartOptions.scales.x, grid: { display: false } },
+                            y: { ...chartOptions.scales.y, max: 100 }
+                        }
+                    }
+                });
+            }
+
+            // 2. Weekly Process Completion (Last 4 Weeks)
+            const weeklyData = {};
+            sortedDates.forEach(date => {
+                const d = new Date(date);
+                const weekStart = new Date(d.setDate(d.getDate() - d.getDay())); // Sunday start of week
+                const weekString = weekStart.toISOString().slice(0, 10);
+                weeklyData[weekString] = weeklyData[weekString] || { sum: 0, count: 0 };
+                weeklyData[weekString].sum += dailyProcessMetrics[date].processPercentage;
+                weeklyData[weekString].count += 1;
+            });
+
+            const sortedWeeks = Object.keys(weeklyData).sort();
+            const recentWeeks = sortedWeeks.slice(Math.max(0, sortedWeeks.length - 4));
+            const weeklyProcessLabels = recentWeeks.map(week => week.slice(5)); // MMDD of week start
+            const weeklyProcessData = recentWeeks.map(week => (weeklyData[week].sum / weeklyData[week].count).toFixed(2));
+
+            const weeklyProcessCtx = document.getElementById('weekly-process-chart');
+            if (weeklyProcessCtx) {
+                chartInstances.weeklyProcessChart = new Chart(weeklyProcessCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: weeklyProcessLabels,
+                        datasets: [{
+                            label: 'Avg. Process Completion (%)',
+                            data: weeklyProcessData,
+                            backgroundColor: weeklyProcessData.map(p => p >= 75 ? greenColor : (p >= 50 ? accentColor : 'orange')),
+                            borderColor: weeklyProcessData.map(p => p >= 75 ? greenColor : (p >= 50 ? accentColor : 'darkorange')),
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        ...chartOptions,
+                        scales: {
+                            x: { ...chartOptions.scales.x, grid: { display: false } },
+                            y: { ...chartOptions.scales.y, max: 100 }
+                        }
+                    }
+                });
+            }
+
+            // 3. Monthly Process Completion (Last 6 Months)
+            const monthlyData = {};
+            sortedDates.forEach(date => {
+                const monthYear = date.slice(0, 7); // YYYY-MM
+                monthlyData[monthYear] = monthlyData[monthYear] || { sum: 0, count: 0 };
+                monthlyData[monthYear].sum += dailyProcessMetrics[date].processPercentage;
+                monthlyData[monthYear].count += 1;
+            });
+
+            const sortedMonths = Object.keys(monthlyData).sort();
+            const recentMonths = sortedMonths.slice(Math.max(0, sortedMonths.length - 6));
+            const monthlyProcessLabels = recentMonths.map(month => month);
+            const monthlyProcessData = recentMonths.map(month => (monthlyData[month].sum / monthlyData[month].count).toFixed(2));
+
+            const monthlyProcessCtx = document.getElementById('monthly-process-chart');
+            if (monthlyProcessCtx) {
+                chartInstances.monthlyProcessChart = new Chart(monthlyProcessCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: monthlyProcessLabels,
+                        datasets: [{
+                            label: 'Avg. Process Completion (%)',
+                            data: monthlyProcessData,
+                            backgroundColor: monthlyProcessData.map(p => p >= 75 ? greenColor : (p => p >= 50 ? primaryColor : 'orange')),
+                            borderColor: monthlyProcessData.map(p => p >= 75 ? greenColor : (p => p >= 50 ? primaryColor : 'darkorange')),
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        ...chartOptions,
+                        scales: {
+                            x: { ...chartOptions.scales.x, grid: { display: false } },
+                            y: { ...chartOptions.scales.y, max: 100 }
+                        }
+                    }
+                });
+            }
+
+            // 4. Daily Logged Steps Count (Last 7 Days)
+            const dailyStepsCountLabels = recentMetrics.map(date => date.slice(5));
+            const dailyStepsCountData = recentMetrics.map(date => dailyProcessMetrics[date].droppedStepCount);
+
+            const dailyStepsCtx = document.getElementById('daily-steps-chart');
+            if (dailyStepsCtx) {
+                chartInstances.dailyStepsChart = new Chart(dailyStepsCtx, {
+                    type: 'line',
+                    data: {
+                        labels: dailyStepsCountLabels,
+                        datasets: [{
+                            label: 'Steps Logged',
+                            data: dailyStepsCountData,
+                            borderColor: primaryColor,
+                            backgroundColor: 'rgba(99, 102, 241, 0.2)', /* Blue tint */
+                            fill: true,
+                            tension: 0.3,
+                            pointRadius: 4,
+                            pointBackgroundColor: primaryColor,
+                        }]
+                    },
+                    options: {
+                        ...chartOptions,
+                        scales: {
+                            x: { ...chartOptions.scales.x, grid: { display: false } },
+                            y: { ...chartOptions.scales.y, ticks: { precision: 0 } }
+                        },
+                        plugins: {
+                            ...chartOptions.plugins,
+                            datalabels: {
+                                align: 'end',
+                                anchor: 'end',
+                                color: textColor,
+                                font: { size: 10 },
+                                formatter: (value) => value
+                            }
+                        }
+                    }
+                });
+            }
+
+            // 5. Daily General Notes Logged (Last 7 Days)
+            const dailyNotesLabels = recentMetrics.map(date => date.slice(5));
+            const dailyNotesData = recentMetrics.map(date => dailyProcessMetrics[date].notesLogged);
+
+            const dailyNotesCtx = document.getElementById('daily-notes-chart');
+            if (dailyNotesCtx) {
+                chartInstances.dailyNotesChart = new Chart(dailyNotesCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: dailyNotesLabels,
+                        datasets: [{
+                            label: 'General Notes Logged',
+                            data: dailyNotesData,
+                            backgroundColor: accentColor,
+                            borderColor: accentColor,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        ...chartOptions,
+                        scales: {
+                            x: { ...chartOptions.scales.x, grid: { display: false } },
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    color: textColor,
+                                    precision: 0,
+                                    stepSize: 1,
+                                    callback: function(value) {
+                                        return value === 1 ? 'Yes' : 'No';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>
